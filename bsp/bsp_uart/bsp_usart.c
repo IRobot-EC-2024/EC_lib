@@ -181,13 +181,39 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size) //todo
     { // find the instance which is being                                 handled
         if (huart == usart_device[i]->usart_handle)
         { // call the callback function if it is not NULL
-            if (usart_device[i]->usart_device_callback != NULL)
-            {
-                usart_device[i]->usart_device_callback(usart_device[i]);
-                memset(usart_device[i]->rx_buff, 0, size); // 接收结束后清空buffer,对于变长数据是必要的   
-				//如果需要清除，就在回调函数里清除
-            }
-            usartDMARestart(usart_device[i]);
+			if(usart_device[i]->rx_buff_num == 2)
+			{
+				usart_device[i]->rx_info.rx_buff_select = (usart_device[i]->usart_handle->hdmarx->Instance->CR & DMA_SxCR_CT)?1:0;//获取现在使用的缓冲区序号 
+				
+				__HAL_DMA_DISABLE(usart_device[i]->usart_handle->hdmarx);											//失效DMA
+				
+				usart_device[i]->rx_info.this_time_rx_len = \
+				USART_RXBUFF_LIMIT/2 - usart_device[i]->usart_handle->hdmarx->Instance->NDTR;						//获取接收数据长度,长度 = 设定长度 - 剩余长度
+				usart_device[i]->usart_handle->hdmarx->Instance->NDTR = USART_RXBUFF_LIMIT/2;        				//重新设定数据长度
+				if(usart_device[i]->rx_info.rx_buff_select)
+					usart_device[i]->usart_handle->hdmarx->Instance->CR &=~DMA_SxCR_CT;        							//设定缓冲区0
+				else
+					usart_device[i]->usart_handle->hdmarx->Instance->CR |= DMA_SxCR_CT;        							//设定缓冲区1  
+				
+				__HAL_DMA_ENABLE(usart_device[i]->usart_handle->hdmarx);											//使能DMA
+				//双缓冲区可以重使能DMA，再先处理回调
+				if (usart_device[i]->usart_device_callback != NULL)
+				{
+					usart_device[i]->usart_device_callback(usart_device[i]);
+					memset(usart_device[i]->rx_buff, 0, size); // 接收结束后清空buffer,对于变长数据是必要的   
+					//如果需要清除，就在回调函数里清除
+				}
+			}
+			else
+			{
+				if (usart_device[i]->usart_device_callback != NULL)
+				{
+					usart_device[i]->usart_device_callback(usart_device[i]);
+					memset(usart_device[i]->rx_buff, 0, size); // 接收结束后清空buffer,对于变长数据是必要的   
+					//如果需要清除，就在回调函数里清除
+				}
+				usartDMARestart(usart_device[i]);
+			}
             return; // break the loop
         }
     }

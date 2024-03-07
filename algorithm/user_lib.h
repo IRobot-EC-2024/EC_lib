@@ -84,6 +84,24 @@ void MatInit(mat *m, uint8_t row, uint8_t col);
 #define VAL_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define VAL_MAX(a, b) ((a) > (b) ? (a) : (b))
 
+typedef  struct
+{
+    float input;        //��������
+    float out;          //�˲����������
+    float num;       //�˲�����
+    float frame_period; //�˲���ʱ���� ��λ s
+		float last_out;
+} first_order_filter_type_t;
+
+typedef  struct
+{
+    float input;        //��������
+    float out;          //�������
+    float min_value;    //�޷���Сֵ
+    float max_value;    //�޷����ֵ
+    float frame_period; //ʱ����
+} ramp_function_source_t;	
+
 /**
  * @brief 返回一块干净的内�?,不过仍然需要强制转�?为你需要的类型
  *
@@ -91,7 +109,7 @@ void MatInit(mat *m, uint8_t row, uint8_t col);
  * @return void*
  */
 void *zmalloc(size_t size);
-
+		
 // ���ٿ���
 float Sqrt(float x);
 // ��������
@@ -120,6 +138,14 @@ void Cross3d(float *v1, float *v2, float *res);
 float Dot3d(float *v1, float *v2);
 
 float AverageFilter(float new_data, float *buf, uint8_t len);
+
+void first_order_filter_init(first_order_filter_type_t *first_order_filter_type, float frame_period, const float num);
+
+void first_order_filter_cali(first_order_filter_type_t *first_order_filter_type, float input);
+
+void ramp_init(ramp_function_source_t *ramp_source_type, float frame_period, float max, float min);
+
+void ramp_calc(ramp_function_source_t *chassis_ramp, float input);
 
 #define rad_format(Ang) loop_float_constrain((Ang), -PI, PI)
 

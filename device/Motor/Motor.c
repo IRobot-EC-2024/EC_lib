@@ -197,7 +197,7 @@ static void djiMotorInfo(DJI_Motor_t *motor){
 	for(i=0;i<id_cnt;i++){
 		if(motor_instance[i]->dji == motor){
 			motor_instance[i]->state_interfaces.last_angle	= motor_instance[i]->state_interfaces.angle;
-			motor_instance[i]->state_interfaces.angle 		= motor->state_interfaces.ecd/8191*360;
+			motor_instance[i]->state_interfaces.angle 		= motor->state_interfaces.ecd/8191.0*360;
 			motor_instance[i]->state_interfaces.current	= motor->state_interfaces.given_current;
 			motor_instance[i]->state_interfaces.speed_rpm	= motor->state_interfaces.speed_rpm;
 			motor_instance[i]->state_interfaces.temperate	= motor->state_interfaces.temperate;

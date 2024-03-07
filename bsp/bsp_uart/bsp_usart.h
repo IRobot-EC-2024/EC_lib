@@ -28,6 +28,11 @@ typedef enum
     USART_TRANSFER_DMA,
 } Usart_Transfer_Mode;
 
+typedef struct{
+	uint8_t rx_buff_select;
+	uint16_t this_time_rx_len;
+}Usart_Receive_Info_t;
+
 typedef struct Usart_Device_{
 
 	UART_HandleTypeDef *usart_handle;				// uart句柄
@@ -35,8 +40,9 @@ typedef struct Usart_Device_{
 		uint8_t rx_buff[USART_RXBUFF_LIMIT];		//单缓冲区使用
 		uint8_t rx_buff2[2][USART_RXBUFF_LIMIT/2];	//双缓存区使用
 	};
-	uint8_t rx_len;									//接收一包数据的大小
+	uint16_t rx_len;									//接收一包数据的大小
 	uint8_t rx_buff_num;							//缓存区数目
+	Usart_Receive_Info_t rx_info;
     // 接收的回调函数,用于解析接收到的数据
     void (*usart_device_callback)(struct Usart_Device_ *); // callback needs an instance to tell among registered ones
 	
@@ -47,7 +53,7 @@ typedef struct{
 	
 	UART_HandleTypeDef *usart_handle;				// uart句柄
 	
-	uint8_t rx_len;									//接收一包数据的大小
+	uint16_t rx_len;									//接收一包数据的大小
 	uint8_t rx_buff_num;							//缓存区数目
 	//接收回调函数
     void (*usart_device_callback)(Usart_Device_t *); 
