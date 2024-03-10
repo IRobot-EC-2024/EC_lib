@@ -26,6 +26,7 @@ static uint8_t id_cnt=0; //记录电机数量
 /***                        添加电机种类时必须修改的部分START                                         ***/
 static void djiMotorInfo(DJI_Motor_t *motor);
 static void dmMotorInfo(DM_Motor_t *motor);
+static void rmdMotorInfo(RMD_Motor_t *motor);
 
 Motor_t *motorAdd(Motor_Register_t *reg){
 	uint16_t motor_mask;
@@ -45,6 +46,13 @@ Motor_t *motorAdd(Motor_Register_t *reg){
 		{
 			motor->dm = dmMotorAdd(&reg->dm_motor_set);
 			motor->dm->motorCallback = dmMotorInfo;
+		}
+		break;
+		
+		case RMD_MOTOR_MASK:
+		{
+			motor->rmd = rmdMotorAdd(&reg->rmd_motor_set);
+			motor->rmd->motorCallback = rmdMotorInfo;
 		}
 		break;
 	}
@@ -85,6 +93,11 @@ void motorDisable(Motor_t *motor){
 			dmMotorDisable(motor->dm);
 		}
 		break;
+		
+		case RMD_MOTOR_MASK:
+		{
+		}
+		break;
 	}
 }
 
@@ -101,6 +114,12 @@ Return_t motorSetMessage(Motor_t *motor){
 		case DM_MOTOR_MASK:
 		{
 			motor->dm->command_interfaces.t = motor->command_interfaces.command;
+		}
+		break;
+		
+		case RMD_MOTOR_MASK:
+		{
+			motor->rmd->command_interfaces.iqControl = motor->command_interfaces.command;
 		}
 		break;
 	}
@@ -123,6 +142,12 @@ Return_t motorSendMessage(Motor_t *motor){
 		case DM_MOTOR_MASK:
 		{
 			dmMotorSendMessage(motor->dm);
+		}
+		break;
+		
+		case RMD_MOTOR_MASK:
+		{
+			rmdMotorSendMessage(motor->rmd);
 		}
 		break;
 	}
@@ -250,4 +275,42 @@ static void dmMotorInfo(DM_Motor_t *motor){
 			break;
 		}
 	}
+}
+
+static void rmdMotorInfo(RMD_Motor_t *motor){
+	uint8_t i=0;
+	for(i=0;i<id_cnt;i++){
+		if(motor_instance[i]->rmd == motor){
+			motor_instance[i]->state_interfaces.last_angle	= motor_instance[i]->state_interfaces.angle;
+			motor_instance[i]->state_interfaces.angle 		= loop_float_constrain(motor->state_interfaces.encoder/16383.0*360,0,360);
+			
+			
+			
+			motor_instance[i]->state_interfaces.current	= motor->state_interfaces.iq/2000.0*32;
+			motor_instance[i]->state_interfaces.speed_rpm	= motor->state_interfaces.speed/PI*60;
+			motor_instance[i]->state_interfaces.temperate	= motor->state_interfaces.temperature;
+			
+			if ((motor_instance[i]->state_interfaces.angle - motor_instance[i]->state_interfaces.last_angle) > 270)
+            {
+                motor_instance[i]->state_interfaces.rounds--;
+            }
+            else if ((motor_instance[i]->state_interfaces.angle - motor_instance[i]->state_interfaces.last_angle) < -270)
+            {
+                motor_instance[i]->state_interfaces.rounds++;
+            }
+			
+            motor_instance[i]->state_interfaces.series_angle = motor_instance[i]->state_interfaces.angle  + 360* motor_instance[i]->state_interfaces.rounds;
+			
+			
+			break;
+		}
+	}
+}
+
+bool_t motorBlockJudgment(Motor_t *motor,float speed_upper_limit){
+	bool_t flag=FALSE;
+	if(fabs(motor->state_interfaces.speed_rpm)<speed_upper_limit){
+		flag = TRUE;
+	}
+	return flag;
 }

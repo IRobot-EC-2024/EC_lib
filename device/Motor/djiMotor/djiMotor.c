@@ -96,7 +96,6 @@ DJI_Motor_t *djiMotorAdd(DJI_Motor_Register_t *reg)//使用can instance注册电
 
 Return_t djiMotorSendMessage()
 {   
-	
 	int16_t can_send_num[2][3]={{-1,-1,-1},{-1,-1,-1}};
 	Return_t ret=RETURN_SUCCESS;
 	

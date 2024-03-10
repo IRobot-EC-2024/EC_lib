@@ -65,10 +65,10 @@ static void usartStartReceive(Usart_Device_t* instance){
     	//disable DMA
     	//失效DMA          
     	__HAL_DMA_DISABLE(instance->usart_handle->hdmarx);
-    while(instance->usart_handle->hdmarx->Instance->CR & DMA_SxCR_EN)
-    {
-        __HAL_DMA_DISABLE(instance->usart_handle->hdmarx);
-    }
+		while(instance->usart_handle->hdmarx->Instance->CR & DMA_SxCR_EN)
+		{
+			__HAL_DMA_DISABLE(instance->usart_handle->hdmarx);
+		}
 
 		//双缓冲区
 		instance->usart_handle->hdmarx->Instance->PAR = (uint32_t) & (USART3->DR);
