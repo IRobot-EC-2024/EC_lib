@@ -1,22 +1,29 @@
 @echo off
-set source_folder=.
+set source_folder=.\
+set taget_folder=.\release
+set src_file=*.c
+set inc_file=*.h
 
-md %source_folder%\release\inc
-md %source_folder%\release\src
+md %taget_folder%\inc
+md %taget_folder%\src
 
-del /q/a/f/s %source_folder%\release\*.*
+del /q/a/f/s %taget_folder%\*.*
 
-for /r %%i in (*.c) do (
+for /r %source_folder% %%i in (%src_file%) do (
 	echo %%~dpi | findstr "__init" >nul ||(
 		echo %%~dpi | findstr "release" >nul ||(
-			copy %%i %source_folder%\release\src
+			copy %%i %taget_folder%\src
 		)
 	)
 )
-for /r %%i in (*.h) do (
+for /r %source_folder% %%i in (%inc_file%) do (
 	echo %%~dpi | findstr "__init" >nul ||(
 		echo %%~dpi | findstr "release" >nul ||(
-			copy %%i %source_folder%\release\inc
+			echo %%~dpi | findstr "Config" >nul ||(
+				copy %%i %taget_folder%\inc
+			)
 		)
 	)
 )
+
+copy .\Config %taget_folder%

@@ -16,8 +16,9 @@
 #include "stdint.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "stm32f4xx.h"
 #include "arm_math.h"
+
+#include "hal_config.h"
 
 
 #ifndef user_malloc
