@@ -208,6 +208,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size) //todo
 			{
 				if (usart_device[i]->usart_device_callback != NULL)
 				{
+					usart_device[i]->rx_info.this_time_rx_len = size;
 					usart_device[i]->usart_device_callback(usart_device[i]);
 					memset(usart_device[i]->rx_buff, 0, size); // 接收结束后清空buffer,对于变长数据是必要的   
 					//如果需要清除，就在回调函数里清除

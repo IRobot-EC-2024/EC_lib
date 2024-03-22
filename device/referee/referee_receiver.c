@@ -8,16 +8,25 @@ uint8_t referee_fifo_buf[REFEREE_FIFO_BUF_LENGTH];
 
 void refereeReceiverCallback(Usart_Device_t *usart);
 
-Referee_Receiver_t *refereeReceiverAdd(UART_HandleTypeDef *huart)
+Referee_Receiver_t *refereeReceiverAdd(UART_HandleTypeDef *huart1,UART_HandleTypeDef *huart2)
 {
     Referee_Receiver_t *receiver = (Referee_Receiver_t*)malloc(sizeof(Referee_Receiver_t));
     Usart_Register_t usart_reg;
     memset(receiver,0,sizeof(Referee_Receiver_t));
-    usart_reg.usart_handle = huart;
+    usart_reg.usart_handle = huart1;
     usart_reg.rx_buff_num = 1;
     usart_reg.rx_len = 256;
     usart_reg.usart_device_callback = refereeReceiverCallback;
     receiver->usart_info = usartDeviceRegister(&usart_reg);
+	
+	
+    memset(receiver,0,sizeof(Referee_Receiver_t));
+    usart_reg.usart_handle = huart2;
+    usart_reg.rx_buff_num = 1;
+    usart_reg.rx_len = 256;
+    usart_reg.usart_device_callback = refereeReceiverCallback;
+    receiver->vision_info = usartDeviceRegister(&usart_reg);
+	
 	
     fifo_s_init(&receiver->referee_fifo, referee_fifo_buf, REFEREE_FIFO_BUF_LENGTH);
 	
@@ -47,7 +56,10 @@ void referee_data_solve(uint8_t *frame)
 
     memcpy(&cmd_id, frame + index, sizeof(uint16_t));
     index += sizeof(uint16_t);
-
+	
+	referee_receiver_instance->status[cmd_id>>8][cmd_id&0x0f] = 1;
+	referee_receiver_instance->offline_counter[cmd_id>>8][cmd_id&0x0f] = 0;
+	
     switch (cmd_id)
     {
         case GAME_STATE_CMD_ID:
@@ -202,4 +214,19 @@ void referee_data_solve(uint8_t *frame)
             break;
         }
     }
+}
+
+void referee_status_updata(void){
+	uint8_t i=0,j=0;
+	
+	for(i=0;i<4;i++){
+		for(j=0;j<16;j++){
+			if(referee_receiver_instance->status[i][j]){
+				referee_receiver_instance->offline_counter[i][j]++;
+				if(referee_receiver_instance->offline_counter[i][j]>1000){
+					referee_receiver_instance->status[i][j]=0;
+				}
+			}
+		}
+	}
 }

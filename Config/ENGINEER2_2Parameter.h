@@ -9,9 +9,9 @@
 //定义长按时间
 #define LONG_PRESSED_TIME 1000
 
-#define MEDUIM_ECD 105.0
-#define AHEAD_ECD  195.0
-#define BACK_ECD   15.00
+#define MEDUIM_ECD 15.0
+#define AHEAD_ECD  105.0
+#define BACK_ECD   -75.0
 
 //小资源岛升降高度
 #define LITTLE_ISLAND_OF_RESOURCES_0   Lift_motor_start_angle[0]+230
@@ -40,11 +40,11 @@
 //兑换模式自动抬升
 #define EXCHANGE_UPWARD_SPEED_AUTO 50
 //兑换模式手动向上抬升目标速度
-#define EXCHANGE_UPWARD_SPEED 28
-#define EXCHANGE_UPWARD_SPEED_SLOWLY 8
+#define EXCHANGE_UPWARD_SPEED 45
+#define EXCHANGE_UPWARD_SPEED_SLOWLY 25
 //兑换模式手动向下下降目标速度
-#define EXCHANGE_DOWNWARD_SPEED -28
-#define EXCHANGE_DOWNWARD_SPEED_SLOWLY -8
+#define EXCHANGE_DOWNWARD_SPEED -8
+#define EXCHANGE_DOWNWARD_SPEED_SLOWLY -3
 
 //资源岛模式向下抓矿下降目标速度
 #define ISLAND_DOWNWARD_SPEED -6
@@ -109,7 +109,7 @@
 #define LIFT_MOTOR_RIGHT_SPEED_KD 0
 
 //抬升左角度环参数
-#define LIFT_MOTOR_LEFT_ANGLE_KP 50		
+#define LIFT_MOTOR_LEFT_ANGLE_KP 50
 #define LIFT_MOTOR_LEFT_ANGLE_KI 0.02
 #define LIFT_MOTOR_LEFT_ANGLE_KD 0
 

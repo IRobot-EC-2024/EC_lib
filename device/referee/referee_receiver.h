@@ -15,7 +15,7 @@ typedef struct{
 	referee_warning_t referee_warning;							//0x0104
 	dart_info_t dart_info;										//0x0105
 	
-	robot_status_t robot_status;									//0x0201
+	robot_status_t robot_status;								//0x0201
 	power_heat_data_t power_heat_data;							//0x0202
 	robot_pos_t robot_pos;										//0x0203
 	buff_t buff;												//0x0204
@@ -42,15 +42,19 @@ typedef struct{
 }Referee_info_t;
 
 typedef struct{
-	uint8_t statu;
+	uint8_t status[4][16];
+	uint32_t offline_counter[4][16];
 	Usart_Device_t *usart_info;
+	Usart_Device_t *vision_info;
 	fifo_s_t referee_fifo;
 	frame_header_struct_t referee_header;
 	Referee_info_t referee_info;
 }Referee_Receiver_t;
 
-Referee_Receiver_t *refereeReceiverAdd(UART_HandleTypeDef *huart);
+Referee_Receiver_t *refereeReceiverAdd(UART_HandleTypeDef *huart1,UART_HandleTypeDef *huart2);
 void referee_data_solve(uint8_t *frame);   
 Referee_Receiver_t *refereeReceiverGet(void);
+
+void referee_status_updata(void);
 
 #endif // !REFEREE_RECEIVER_H__
