@@ -19,7 +19,7 @@
 
 #include "djiMotor.h"
 #include "DMMotor.h"
-
+#include "RMDMotor.h"
 
 
 #define MAX_MOTOR_NUM      30 //
@@ -56,6 +56,7 @@ typedef struct{
 	union{
 		DJI_Motor_t *dji;
 		DM_Motor_t 	*dm;
+		RMD_Motor_t	*rmd;
 	};
 	
 }Motor_t;
@@ -63,6 +64,7 @@ typedef struct{
 typedef union{
 	DJI_Motor_Register_t dji_motor_set;
 	DM_Motor_Register_t dm_motor_set;
+	RMD_Motor_Register_t rmd_motor_set;
 	struct{
 		uint32_t motor_type;
 	};
@@ -105,6 +107,7 @@ void motorPositionControl(Motor_t *motor,Position_Controller_t *controller);//to
 Position_Controller_t *positionControllerInit(cascade_PID_Init_Config_s *config,float *out_fdb);
 
 //电机测试应用
+bool_t motorBlockJudgment(Motor_t *motor,float speed_upper_limit);
 void motor_SwitchRing(Motor_t *motor,Position_Controller_t *controller);
 
 

@@ -6,16 +6,25 @@
 #define AIMBOT_OFFLINE_TIMEMAX  550
 #define REFEREE_OFFLINE_TIMEMAX 3000
 
+#define GM6020_MAX_OUTPUT                       30000
+#define GM6020_MAX_IOUTPUT                      10000
+#define M3508_MAX_OUTPUT                        16384
+#define M3508_MAX_IOUTPUT                       6000
+#define M2006_MAX_OUTPUT                        10000
+#define M2006_MAX_IOUTPUT                       5000
 
+//#define MUC1		//通常指云台主控板
+#define MUC2			//通常指底盘主控板
 
 //#define HERO1
 //#define HERO1_0
 //#define HERO1_1
 //#define HERO1_2
-#define INFANTRY3
+//#define INFANTRY3
 //#define INFANTRY4
 //#define INFANTRY5
 //#define SENTRY7
+#define ENGINEER2
 
 #ifdef INFANTRY4
 
@@ -335,6 +344,17 @@
 
 #endif
 
+#ifdef ENGINEER2
+
+#ifdef MUC1
+#define PARAMETER_FILE "ENGINEER2_1Parameter.h"
+#define KEYMAP_FILE "ENGINEER2Keymap.h"
+#elif defined MUC2
+#define PARAMETER_FILE "ENGINEER2_2Parameter.h"
+#define KEYMAP_FILE "ENGINEER2Keymap.h"
+#endif
+
+#endif
 
 //#define IMU_DIRECTION_xyz_XYZ
 //#define IMU_DIRECTION_yrxz_XYZ

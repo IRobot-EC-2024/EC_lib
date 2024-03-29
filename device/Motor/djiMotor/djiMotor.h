@@ -55,7 +55,11 @@ typedef struct DJI_Motor_{
 typedef struct{
 
 	DJI_Motor_type_t motor_type;
-	CAN_HandleTypeDef *hcan;
+	#ifdef CAN_DEVICE
+	CAN_HandleTypeDef *can_handle;
+	#elif defined(FDCAN_DEVICE)
+	FDCAN_HandleTypeDef *can_handle;
+	#endif
 	uint8_t id;
 }DJI_Motor_Register_t;
 

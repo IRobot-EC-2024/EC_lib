@@ -212,3 +212,73 @@ void MatInit(mat *m, uint8_t row, uint8_t col)
     m->numRows = row;
     m->pData = (float *)zmalloc(row * col * sizeof(float));
 }
+/**
+  * @brief          一阶低通滤波初始化
+  * @author         RM
+  * @param[in]      一阶低通滤波结构体
+  * @param[in]      间隔的时间，单位 s
+  * @param[in]      滤波参数
+  * @retval         返回空
+  */
+void first_order_filter_init(first_order_filter_type_t *first_order_filter_type, float frame_period, const float num)
+{
+    first_order_filter_type->frame_period = frame_period;
+    first_order_filter_type->num = num;
+    first_order_filter_type->input = 0.0f;
+    first_order_filter_type->out = 0.0f;
+}
+
+/**
+  * @brief          一阶低通滤波计算
+  * @author         
+  * @param[in]      一阶低通滤波结构体
+  * @param[in]      间隔的时间，单位 s
+  * @retval         返回空
+  */
+void first_order_filter_cali(first_order_filter_type_t *first_order_filter_type, float input)
+{
+	first_order_filter_type->last_out = first_order_filter_type->out;
+    first_order_filter_type->input = input;
+    first_order_filter_type->out =
+    first_order_filter_type->num / (first_order_filter_type->num + first_order_filter_type->frame_period) * first_order_filter_type->out + 
+	first_order_filter_type->frame_period / (first_order_filter_type->num + first_order_filter_type->frame_period) * first_order_filter_type->input;
+//					first_order_filter_type->input * first_order_filter_type->num[0]+(1-first_order_filter_type->num[0])*first_order_filter_type->last_out;
+}
+
+/**
+  * @brief    			斜坡函数初始化
+  * @param    			斜坡函数结构体
+  * @param    			间隔时间
+  * @param    			斜坡目标值
+  * @param    			斜坡源
+  */
+void ramp_init(ramp_function_source_t *ramp_source_type, float frame_period, float max, float min)
+{
+    ramp_source_type->frame_period = frame_period;
+    ramp_source_type->max_value = max;
+    ramp_source_type->min_value = min;
+    ramp_source_type->input = 0.0f;
+    ramp_source_type->out = 0.0f;
+}
+
+void ramp_calc(ramp_function_source_t *chassis_ramp, float input)
+{
+    chassis_ramp->input = input;
+	if(input != 0)
+	{
+    chassis_ramp->out += chassis_ramp->input * chassis_ramp->frame_period;
+    if (chassis_ramp->out > chassis_ramp->max_value)
+        chassis_ramp->out = chassis_ramp->max_value;
+    else if (chassis_ramp->out < chassis_ramp->min_value)
+        chassis_ramp->out = chassis_ramp->min_value;
+	}
+	else
+	{
+		if(chassis_ramp->out > 5)
+		  chassis_ramp->out -= 10.0f;
+		else if(chassis_ramp->out <-5)
+			chassis_ramp->out += 10.0f;
+		else
+			chassis_ramp->out = 0;
+	}
+}

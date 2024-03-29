@@ -21,6 +21,10 @@ static uint8_t id_cnt; //记录大疆电机数量
 static uint8_t   MotorSendBuffer_can1[24];
 static uint8_t   MotorSendBuffer_can2[24];
 
+#if defined(CAN_HANDLE3)
+static uint8_t   MotorSendBuffer_can3[24];
+#endif
+
 static uint32_t             send_mail_box_can1;
 static uint32_t             send_mail_box_can2;
 
@@ -54,7 +58,7 @@ DJI_Motor_t *djiMotorAdd(DJI_Motor_Register_t *reg)//使用can instance注册电
     memset(&can_reg, 0, sizeof(Can_Register_t));
     memset(motor, 0, sizeof(DJI_Motor_t));
 	
-    can_reg.can_handle = reg->hcan;
+    can_reg.can_handle = reg->can_handle;
     can_reg.tx_dlc = 8; 
     can_reg.can_device_callback = djiMotorCallback;
 	
@@ -96,7 +100,8 @@ DJI_Motor_t *djiMotorAdd(DJI_Motor_Register_t *reg)//使用can instance注册电
 
 Return_t djiMotorSendMessage()
 {   
-	int16_t can_send_num[2][3]={{-1,-1,-1},{-1,-1,-1}};
+	 
+	int16_t can_send_num[3][3]={{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	Return_t ret=RETURN_SUCCESS;
 	
     for(uint8_t i =0;i<id_cnt;i++)
@@ -109,7 +114,7 @@ Return_t djiMotorSendMessage()
         }
 
 
-        if(dji_motor[i]->can_info->can_handle == &hcan1)
+        if(dji_motor[i]->can_info->can_handle == &CAN_HANDLE1)
         {
             MotorSendBuffer_can1[(dji_motor[i]->can_info->rx_id - 0x201)*2 ] = dji_motor[i]->command_interfaces.command >> 8;
             MotorSendBuffer_can1[(dji_motor[i]->can_info->rx_id - 0x201)*2 + 1] = dji_motor[i]->command_interfaces.command;
@@ -126,7 +131,7 @@ Return_t djiMotorSendMessage()
 				break;
 			}
         }
-        else if (dji_motor[i]->can_info->can_handle == &hcan2)
+        else if (dji_motor[i]->can_info->can_handle == &CAN_HANDLE2)
         {
             MotorSendBuffer_can2[(dji_motor[i]->can_info->rx_id - 0x201)*2 ] = dji_motor[i]->command_interfaces.command >> 8;
             MotorSendBuffer_can2[(dji_motor[i]->can_info->rx_id - 0x201)*2 + 1] = dji_motor[i]->command_interfaces.command;
@@ -143,6 +148,25 @@ Return_t djiMotorSendMessage()
 				break;
 			}
         }
+		#ifdef CAN_HANDLE3
+        else if (dji_motor[i]->can_info->can_handle == &CAN_HANDLE3)
+        {
+            MotorSendBuffer_can3[(dji_motor[i]->can_info->rx_id - 0x201)*2 ] = dji_motor[i]->command_interfaces.command >> 8;
+            MotorSendBuffer_can3[(dji_motor[i]->can_info->rx_id - 0x201)*2 + 1] = dji_motor[i]->command_interfaces.command;
+			
+			switch(dji_motor[i]->can_info->tx_id){
+				case 0x200:
+					can_send_num[2][0]=i;
+				break;
+				case 0x1FF:
+					can_send_num[2][1]=i;
+				break;
+				case 0x2FF:
+					can_send_num[2][2]=i;
+				break;
+			}
+        }
+		#endif
     }
 	
 	if(can_send_num[0][0]>=0){

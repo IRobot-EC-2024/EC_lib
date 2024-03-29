@@ -63,7 +63,7 @@ DM_Motor_t *dmMotorAdd(DM_Motor_Register_t *reg){
     memset(&can_reg, 0, sizeof(Can_Register_t));
     memset(motor, 0, sizeof(DM_Motor_t));
 	
-    can_reg.can_handle 			= reg->hcan;
+    can_reg.can_handle 			= reg->can_handle;
     can_reg.tx_dlc 				= 8; 
     can_reg.can_device_callback = dmMotorCallback;
 	can_reg.tx_id				= reg->tx_id;

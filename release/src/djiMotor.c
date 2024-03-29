@@ -21,6 +21,10 @@ static uint8_t id_cnt; //记录大疆电机数量
 static uint8_t   MotorSendBuffer_can1[24];
 static uint8_t   MotorSendBuffer_can2[24];
 
+#if defined(FDCAN_DEVICE)
+static uint8_t   MotorSendBuffer_can3[24];
+#endif
+
 static uint32_t             send_mail_box_can1;
 static uint32_t             send_mail_box_can2;
 
@@ -54,7 +58,7 @@ DJI_Motor_t *djiMotorAdd(DJI_Motor_Register_t *reg)//使用can instance注册电
     memset(&can_reg, 0, sizeof(Can_Register_t));
     memset(motor, 0, sizeof(DJI_Motor_t));
 	
-    can_reg.can_handle = reg->hcan;
+    can_reg.can_handle = reg->can_handle;
     can_reg.tx_dlc = 8; 
     can_reg.can_device_callback = djiMotorCallback;
 	
@@ -96,8 +100,8 @@ DJI_Motor_t *djiMotorAdd(DJI_Motor_Register_t *reg)//使用can instance注册电
 
 Return_t djiMotorSendMessage()
 {   
-	
-	int16_t can_send_num[2][3]={{-1,-1,-1},{-1,-1,-1}};
+	 
+	int16_t can_send_num[3][3]={{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	Return_t ret=RETURN_SUCCESS;
 	
     for(uint8_t i =0;i<id_cnt;i++)

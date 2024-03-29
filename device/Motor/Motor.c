@@ -34,6 +34,10 @@ Motor_t *motorAdd(Motor_Register_t *reg){
 	
 	Motor_t *motor = (Motor_t *)malloc(sizeof(Motor_t));
 	
+	if(motor == NULL){
+		return NULL;
+	}
+	
 	switch(motor_mask){
 		case DJI_MOTOR_MASK:
 		{

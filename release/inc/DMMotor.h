@@ -71,7 +71,11 @@ typedef struct DM_Motor_{
 typedef struct{
 
 	DM_Motor_type_t motor_type;
-	CAN_HandleTypeDef *hcan;
+	#ifdef CAN_DEVICE
+	CAN_HandleTypeDef *can_handle;
+	#elif defined(FDCAN_DEVICE)
+	FDCAN_HandleTypeDef *can_handle;
+	#endif
 	uint16_t rx_id;
 	uint16_t tx_id;
 	

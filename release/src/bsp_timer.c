@@ -25,7 +25,7 @@ static uint32_t timerSelectTclk(TIM_HandleTypeDef *htim )
             (tclk_temp <= (APB1PERIPH_BASE + 0x2000UL)) &&
             (tclk_temp >= (APB1PERIPH_BASE + 0x0000UL)))
     {
-        return (HAL_RCC_GetPCLK1Freq() * (APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE1)>> RCC_CFGR_PPRE1_Pos] == 0 ? 1 : 2));
+        return (HAL_RCC_GetPCLK1Freq() * (D1CorePrescTable[(RCC->CFGR & RCC_CFGR_PPRE1)>> RCC_CFGR_PPRE1_Pos] == 0 ? 1 : 2));
     }
     else if (
             ((tclk_temp <= (APB2PERIPH_BASE + 0x0400UL)) &&
