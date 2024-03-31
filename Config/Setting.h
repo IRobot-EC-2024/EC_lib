@@ -24,7 +24,8 @@
 // #define INFANTRY4
 // #define INFANTRY5
 // #define SENTRY7
-#define ENGINEER2
+//#define ENGINEER2_0
+#define ENGINEER2_1
 
 #ifdef INFANTRY4
 
@@ -331,13 +332,25 @@
 
 #endif
 
-#ifdef ENGINEER2
+#ifdef ENGINEER2_0
 
 #ifdef MUC1
-#define PARAMETER_FILE "ENGINEER2_1Parameter.h"
+#define PARAMETER_FILE "ENGINEER2_0_1Parameter.h"
 #define KEYMAP_FILE "ENGINEER2Keymap.h"
-#elif defined MUC2
-#define PARAMETER_FILE "ENGINEER2_2Parameter.h"
+#elif defined(MUC2)
+#define PARAMETER_FILE "ENGINEER2_0_2Parameter.h"
+#define KEYMAP_FILE "ENGINEER2Keymap.h"
+#endif
+
+#endif
+
+#ifdef ENGINEER2_1
+
+#ifdef MUC1
+#define PARAMETER_FILE "ENGINEER2_1_1Parameter.h"
+#define KEYMAP_FILE "ENGINEER2Keymap.h"
+#elif defined(MUC2)
+#define PARAMETER_FILE "ENGINEER2_1_2Parameter.h"
 #define KEYMAP_FILE "ENGINEER2Keymap.h"
 #endif
 

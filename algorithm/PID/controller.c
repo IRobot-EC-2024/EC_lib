@@ -23,6 +23,8 @@ Timer_Device_t *timer;
 
 #endif
 
+static uint8_t timer_init_flag=0;
+
 
 /* ----------------------------下面是pid优化环节的实现---------------------------- */
 
@@ -138,6 +140,11 @@ static void f_PID_ErrorHandle(PIDInstance *pid)
  * @param 无
  */
 void pidTimerInit(){
+	
+	if(timer_init_flag==0){
+		timer_init_flag=1;
+	}else
+		return ;
 	#if PID_USE_DWT
 	DWT_Init(168);
 	#else
@@ -159,7 +166,8 @@ void pidTimerInit(){
  * @param config PID初始化设置
  */
 void PIDInit(PIDInstance *pid, PID_Init_Config_s *config)
-{
+{	
+	pidTimerInit();
     // config的数据和pid的部分数据是连续且相同的的,所以可以直接用memcpy
     // @todo: 不建议这样做,可扩展性差,不知道的开发者可能会误以为pid和config是同一个结构体
     // 后续修改为逐个赋值
@@ -171,6 +179,7 @@ void PIDInit(PIDInstance *pid, PID_Init_Config_s *config)
 }
 void cascadePIDInit(cascadePIDInstacne *cascade_pid,cascade_PID_Init_Config_s *config)
 {
+	pidTimerInit();
     memset(&cascade_pid->out_pid, 0, sizeof(PIDInstance));
     memset(&cascade_pid->in_pid, 0, sizeof(PIDInstance));
     memcpy(&cascade_pid->out_pid, &config->out_pid_config, sizeof(PID_Init_Config_s));
