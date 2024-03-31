@@ -10,8 +10,8 @@
 // 
 //
 //=====================================================================================================
-#ifndef DJIMOTOR_H__
-#define DJIMOTOR_H__
+#ifndef RMDMOTOR_H__
+#define RMDMOTOR_H__
 
 #include "main.h"
 #include "struct_typedef.h"
@@ -19,54 +19,54 @@
 #include "bsp_can.h"
 #include "bsp_dwt.h"
 
-#define MAX_DJI_MOTOR_NUM      14 //姑且算一个can7个电机
+#define MAX_RMD_MOTOR_NUM      3 //姑且算一个can7个电机
 #define OFFLINE_TIME_MAX       0.1//单位s
 typedef enum
 {
-	DJI_MOTOR_MASK 	= 0x10,
-    DJI_MOTOR_6020 	= 0x11,
-	DJI_MOTOR_3508	= 0x12,
-	DJI_MOTOR_2006	= 0x13,
+	RMD_MOTOR_MASK 	= 0x80,
+    RMD_MOTOR_4015 	= 0x81,
 	
-} DJI_Motor_type_t;
+} RMD_Motor_type_t;
 
 typedef struct{
-    uint16_t ecd;
-    int16_t speed_rpm;
-    int16_t given_current;
-    uint8_t temperate;
-	
-}DJI_Motor_Info_t;
+	uint8_t cmd_id;
+	int8_t temperature;
+	int16_t iq;
+	int16_t speed;
+	uint16_t encoder;
+}RMD_Motor_Info_t;
 
 typedef struct{
-    int16_t command;
-}DJI_Command_t;
+    int16_t iqControl;
+}RMD_Command_t;
 
-typedef struct DJI_Motor_{
+typedef struct RMD_Motor_{
 	uint8_t statu;  //online 0  / offline 1 
-	DJI_Motor_type_t motor_type; //6020   3508   2006   need add pls contact lwt
-    DJI_Motor_Info_t state_interfaces;
+	RMD_Motor_type_t motor_type; //6020   3508   2006   need add pls contact lwt
+    RMD_Motor_Info_t state_interfaces;
     Can_Device_t *can_info;
-    DJI_Command_t command_interfaces;
+    RMD_Command_t command_interfaces;
 	
-	void (*motorCallback)(struct DJI_Motor_*);
-}DJI_Motor_t;
+	void (*motorCallback)(struct RMD_Motor_*);
+}RMD_Motor_t;
 
 typedef struct{
 
-	DJI_Motor_type_t motor_type;
+	RMD_Motor_type_t motor_type;
+	
 	#ifdef CAN_DEVICE
 	CAN_HandleTypeDef *can_handle;
 	#elif defined(FDCAN_DEVICE)
 	FDCAN_HandleTypeDef *can_handle;
 	#endif
+	
 	uint8_t id;
-}DJI_Motor_Register_t;
+}RMD_Motor_Register_t;
 
 
-DJI_Motor_t *djiMotorAdd(DJI_Motor_Register_t *reg);
-void djiMotorDelete(DJI_Motor_t *motor);
-void djiMotorInfoUpdate(DJI_Motor_t *motor,uint8_t *data);
-Return_t djiMotorSendMessage();
+RMD_Motor_t *rmdMotorAdd(RMD_Motor_Register_t *reg);
+void rmdMotorDelete(RMD_Motor_t *motor);
+void rmdMotorInfoUpdate(RMD_Motor_t *motor,uint8_t *data);
+Return_t rmdMotorSendMessage();
 
 #endif // !DJIMOTOR_H__

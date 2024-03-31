@@ -1,373 +1,369 @@
 #ifndef SETTING_H
 #define SETTING_H
 
-#define MOTOR_OFFLINE_TIMEMAX   50
-#define REMOTE_OFFLINE_TIMEMAX  550
-#define AIMBOT_OFFLINE_TIMEMAX  550
+#define MOTOR_OFFLINE_TIMEMAX 50
+#define REMOTE_OFFLINE_TIMEMAX 550
+#define AIMBOT_OFFLINE_TIMEMAX 550
 #define REFEREE_OFFLINE_TIMEMAX 3000
 
-#define GM6020_MAX_OUTPUT                       30000
-#define GM6020_MAX_IOUTPUT                      10000
-#define M3508_MAX_OUTPUT                        16384
-#define M3508_MAX_IOUTPUT                       6000
-#define M2006_MAX_OUTPUT                        10000
-#define M2006_MAX_IOUTPUT                       5000
+#define GM6020_MAX_OUTPUT 30000
+#define GM6020_MAX_IOUTPUT 10000
+#define M3508_MAX_OUTPUT 16384
+#define M3508_MAX_IOUTPUT 6000
+#define M2006_MAX_OUTPUT 10000
+#define M2006_MAX_IOUTPUT 5000
 
-//#define MUC1		//é€šå¸¸æŒ‡äº‘å°ä¸»æŽ§æ¿
-#define MUC2			//é€šå¸¸æŒ‡åº•ç›˜ä¸»æŽ§æ¿
+#define MUC1
+// #define MUC2
 
-//#define HERO1
-//#define HERO1_0
-//#define HERO1_1
-//#define HERO1_2
-//#define INFANTRY3
-//#define INFANTRY4
-//#define INFANTRY5
-//#define SENTRY7
-#define ENGINEER2
+// #define HERO1
+// #define HERO1_0
+// #define HERO1_1
+// #define HERO1_2
+// #define INFANTRY3
+// #define INFANTRY4
+// #define INFANTRY5
+// #define SENTRY7
+// #define ENGINEER2_0
+#define ENGINEER2_1
 
 #ifdef INFANTRY4
 
-// ²ÎÊýÅäÖÃÎÄ¼þ
+// å‚æ•°é…ç½®æ–‡ä»¶
 #define PARAMETER_FILE "Infantry4Parameter.h"
-// ¼üÎ»ÅäÖÃÎÄ¼þ
+// é”®ä½é…ç½®æ–‡ä»¶
 #define KEYMAP_FILE "Infantry4KeyMap.h"
-// imu°²×°·½Ïò
+// imuå®‰è£…æ–¹å‘
 #define IMU_DIRECTION_zryx_XYZ
-// gyro yawÖáÆ«ÖÃ
+// gyro yawè½´åç½®
 #define GYRO_YAW_BIAS -0.0055f
-// Ö÷·¢Éä»ú¹¹ÀàÐÍ
+// ä¸»å‘å°„æœºæž„ç±»åž‹
 #define MAIN_SHOOTER_TYPE_NORMAL
-//#define MAIN_SHOOTER_TYPE_HEAVY
-// µç»úID·ÖÅä
-#define YAW_MOTOR_ID                0x205
-#define PITCH_MOTOR_ID              0x206
-#define ROTOR_MOTOR_ID              0x203
-#define AMMO_LEFT_MOTOR_ID          0x202
-#define AMMO_RIGHT_MOTOR_ID         0x201
-// µç»ú°²×°·½Ïò
-// ÔÆÌ¨µç»úÕýÏòÔË¶¯·½ÏòºÍÔÆÌ¨×ËÌ¬£¨¿ØÖÆ£©×ø±êÏµÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// ²¦ÅÌµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯Íè½øÈëÇ¹¹Ü·½ÏòÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// Ä¦²ÁÂÖµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯µÀÍ¬ÏòÎª1£¬·´ÏòÎª-1
-#define YAW_MOTOR_DIRECTION         1
-#define PITCH_MOTOR_DIRECTION       1
-#define ROTOR_MOTOR_DIRECTION       -1
-#define AMMO_LEFT_MOTOR_DIRECTION   -1
-#define AMMO_RIGHT_MOTOR_DIRECTION  1
-// ÔÆÌ¨YAWÖáÁãµãºÍ¸©ÑöÏÞ·ù
-#define YAW_ZERO_ECDANGLE           -144.102539f
-#define PITCH_MIN_ANGLE             -31.0f
-#define PITCH_MAX_ANGLE             18.0f
-// Ä¬ÈÏÄ¦²ÁÂÖËÙ¶È
-#define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_15MS
-#define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_15MS
-#define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_15MS
-// Í¨ÐÅcan×ÜÏßÎ»ÖÃ
-#define COMMUNICATE_CANPORT         hcan1
+// #define MAIN_SHOOTER_TYPE_HEAVY
+//  ç”µæœºIDåˆ†é…
+#define YAW_MOTOR_ID 0x205
+#define PITCH_MOTOR_ID 0x206
+#define ROTOR_MOTOR_ID 0x203
+#define AMMO_LEFT_MOTOR_ID 0x202
+#define AMMO_RIGHT_MOTOR_ID 0x201
+// ç”µæœºå®‰è£…æ–¹å‘
+// äº‘å°ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œäº‘å°å§¿æ€ï¼ˆæŽ§åˆ¶ï¼‰åæ ‡ç³»åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‹¨ç›˜ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹ä¸¸è¿›å…¥æžªç®¡æ–¹å‘åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‘©æ“¦è½®ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹é“åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+#define YAW_MOTOR_DIRECTION 1
+#define PITCH_MOTOR_DIRECTION 1
+#define ROTOR_MOTOR_DIRECTION -1
+#define AMMO_LEFT_MOTOR_DIRECTION -1
+#define AMMO_RIGHT_MOTOR_DIRECTION 1
+// äº‘å°YAWè½´é›¶ç‚¹å’Œä¿¯ä»°é™å¹…
+#define YAW_ZERO_ECDANGLE -144.102539f
+#define PITCH_MIN_ANGLE -31.0f
+#define PITCH_MAX_ANGLE 18.0f
+// é»˜è®¤æ‘©æ“¦è½®é€Ÿåº¦
+#define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_15MS
+#define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_15MS
+#define DEFAULT_AMMO_SPEEDSET AMMO_SPEEDSET_15MS
+// é€šä¿¡canæ€»çº¿ä½ç½®
+#define COMMUNICATE_CANPORT hcan1
 #endif
-
 
 #ifdef INFANTRY3
 
-// ²ÎÊýÅäÖÃÎÄ¼þ
+// å‚æ•°é…ç½®æ–‡ä»¶
 #define PARAMETER_FILE "Infantry3Parameter.h"
-// ¼üÎ»ÅäÖÃÎÄ¼þ
+// é”®ä½é…ç½®æ–‡ä»¶
 #define KEYMAP_FILE "Infantry4KeyMap.h"
-// imu°²×°·½Ïò
+// imuå®‰è£…æ–¹å‘
 #define IMU_DIRECTION_rxryz_XYZ
-// gyro yawÖáÆ«ÖÃ
-#define GYRO_YAW_BIAS -0.019981f//-0.01065f
-// Ö÷·¢Éä»ú¹¹ÀàÐÍ
+// gyro yawè½´åç½®
+#define GYRO_YAW_BIAS -0.019981f //-0.01065f
+// ä¸»å‘å°„æœºæž„ç±»åž‹
 #define MAIN_SHOOTER_TYPE_NORMAL
-//#define MAIN_SHOOTER_TYPE_HEAVY
-// µç»úID·ÖÅä
-#define YAW_MOTOR_ID                0x205
-#define PITCH_MOTOR_ID              0x206
-#define ROTOR_MOTOR_ID              0x203
-#define AMMO_LEFT_MOTOR_ID          0x201
-#define AMMO_RIGHT_MOTOR_ID         0x202
-// µç»ú°²×°·½Ïò
-// ÔÆÌ¨µç»úÕýÏòÔË¶¯·½ÏòºÍÔÆÌ¨×ËÌ¬£¨¿ØÖÆ£©×ø±êÏµÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// ²¦ÅÌµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯Íè½øÈëÇ¹¹Ü·½ÏòÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// Ä¦²ÁÂÖµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯µÀÍ¬ÏòÎª1£¬·´ÏòÎª-1
-#define YAW_MOTOR_DIRECTION         1
-#define PITCH_MOTOR_DIRECTION       -1
-#define ROTOR_MOTOR_DIRECTION       1
-#define AMMO_LEFT_MOTOR_DIRECTION   -1
-#define AMMO_RIGHT_MOTOR_DIRECTION  1
-// ÔÆÌ¨YAWÖáÁãµãºÍ¸©ÑöÏÞ·ù
-#define YAW_ZERO_ECDANGLE           180.0f-142.5f//21.4f
-#define PITCH_MIN_ANGLE             -27.0f//-24.0f//-26.0f
-#define PITCH_MAX_ANGLE             15.0f//15.0f
-// Ä¬ÈÏÄ¦²ÁÂÖËÙ¶È
-#define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_30MS
-#define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_30MS
-#define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_30MS
-// Í¨ÐÅcan×ÜÏßÎ»ÖÃ
-#define COMMUNICATE_CANPORT         hcan1
+// #define MAIN_SHOOTER_TYPE_HEAVY
+//  ç”µæœºIDåˆ†é…
+#define YAW_MOTOR_ID 0x205
+#define PITCH_MOTOR_ID 0x206
+#define ROTOR_MOTOR_ID 0x203
+#define AMMO_LEFT_MOTOR_ID 0x201
+#define AMMO_RIGHT_MOTOR_ID 0x202
+// ç”µæœºå®‰è£…æ–¹å‘
+// äº‘å°ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œäº‘å°å§¿æ€ï¼ˆæŽ§åˆ¶ï¼‰åæ ‡ç³»åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‹¨ç›˜ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹ä¸¸è¿›å…¥æžªç®¡æ–¹å‘åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‘©æ“¦è½®ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹é“åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+#define YAW_MOTOR_DIRECTION 1
+#define PITCH_MOTOR_DIRECTION -1
+#define ROTOR_MOTOR_DIRECTION 1
+#define AMMO_LEFT_MOTOR_DIRECTION -1
+#define AMMO_RIGHT_MOTOR_DIRECTION 1
+// äº‘å°YAWè½´é›¶ç‚¹å’Œä¿¯ä»°é™å¹…
+#define YAW_ZERO_ECDANGLE 180.0f - 142.5f // 21.4f
+#define PITCH_MIN_ANGLE -27.0f            //-24.0f//-26.0f
+#define PITCH_MAX_ANGLE 15.0f             // 15.0f
+// é»˜è®¤æ‘©æ“¦è½®é€Ÿåº¦
+#define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_30MS
+#define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_30MS
+#define DEFAULT_AMMO_SPEEDSET AMMO_SPEEDSET_30MS
+// é€šä¿¡canæ€»çº¿ä½ç½®
+#define COMMUNICATE_CANPORT hcan1
 #endif
-
-
 
 #ifdef SENTRY7
-// ²ÎÊýÅäÖÃÎÄ¼þ
+// å‚æ•°é…ç½®æ–‡ä»¶
 #define PARAMETER_FILE "Sentry7Parameter.h"
-// ¼üÎ»ÅäÖÃÎÄ¼þ
+// é”®ä½é…ç½®æ–‡ä»¶
 #define KEYMAP_FILE "Sensor7KeyMap.h"
-// imu°²×°·½Ïò
+// imuå®‰è£…æ–¹å‘
 #define IMU_DIRECTION_yrxz_XYZ
-// µç»úID·ÖÅä
-#define YAW_MOTOR_ID                0x205
-#define PITCH_MOTOR_ID              0x206
-#define ROTOR_MOTOR_ID              0x203
-#define AMMO_LEFT_MOTOR_ID          0x201
-#define AMMO_RIGHT_MOTOR_ID         0x202
-// µç»ú°²×°·½Ïò
-// ÔÆÌ¨µç»úÕýÏòÔË¶¯·½ÏòºÍÔÆÌ¨×ËÌ¬£¨¿ØÖÆ£©×ø±êÏµÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// ²¦ÅÌµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯Íè½øÈëÇ¹¹Ü·½ÏòÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// Ä¦²ÁÂÖµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯µÀÍ¬ÏòÎª1£¬·´ÏòÎª-1
-#define YAW_MOTOR_DIRECTION         -1
-#define PITCH_MOTOR_DIRECTION       -1
-#define ROTOR_MOTOR_DIRECTION       1
-#define AMMO_LEFT_MOTOR_DIRECTION   -1
-#define AMMO_RIGHT_MOTOR_DIRECTION  1
-// ÔÆÌ¨YAWÖáÁãµãºÍ¸©ÑöÏÞ·ù
-#define YAW_ZERO_ECDANGLE           0.0f
-#define PITCH_MIN_ANGLE             -8.8f
-#define PITCH_MAX_ANGLE             28.0f
-// Ä¬ÈÏÄ¦²ÁÂÖËÙ¶È
-#define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_15MS
-#define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_15MS
-#define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_15MS
-// Í¨ÐÅcan×ÜÏßÎ»ÖÃ
-#define COMMUNICATE_CANPORT         hcan2
+// ç”µæœºIDåˆ†é…
+#define YAW_MOTOR_ID 0x205
+#define PITCH_MOTOR_ID 0x206
+#define ROTOR_MOTOR_ID 0x203
+#define AMMO_LEFT_MOTOR_ID 0x201
+#define AMMO_RIGHT_MOTOR_ID 0x202
+// ç”µæœºå®‰è£…æ–¹å‘
+// äº‘å°ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œäº‘å°å§¿æ€ï¼ˆæŽ§åˆ¶ï¼‰åæ ‡ç³»åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‹¨ç›˜ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹ä¸¸è¿›å…¥æžªç®¡æ–¹å‘åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‘©æ“¦è½®ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹é“åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+#define YAW_MOTOR_DIRECTION -1
+#define PITCH_MOTOR_DIRECTION -1
+#define ROTOR_MOTOR_DIRECTION 1
+#define AMMO_LEFT_MOTOR_DIRECTION -1
+#define AMMO_RIGHT_MOTOR_DIRECTION 1
+// äº‘å°YAWè½´é›¶ç‚¹å’Œä¿¯ä»°é™å¹…
+#define YAW_ZERO_ECDANGLE 0.0f
+#define PITCH_MIN_ANGLE -8.8f
+#define PITCH_MAX_ANGLE 28.0f
+// é»˜è®¤æ‘©æ“¦è½®é€Ÿåº¦
+#define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_15MS
+#define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_15MS
+#define DEFAULT_AMMO_SPEEDSET AMMO_SPEEDSET_15MS
+// é€šä¿¡canæ€»çº¿ä½ç½®
+#define COMMUNICATE_CANPORT hcan2
 #endif
 
-
-
-
 #ifdef HERO1_0
-// ²ÎÊýÅäÖÃÎÄ¼þ
+// å‚æ•°é…ç½®æ–‡ä»¶
 #define PARAMETER_FILE "Hero1_0Parameter.h"
-// ¼üÎ»ÅäÖÃÎÄ¼þ
+// é”®ä½é…ç½®æ–‡ä»¶
 #define KEYMAP_FILE "Hero1_0KeyMap.h"
-// imu°²×°·½Ïò
+// imuå®‰è£…æ–¹å‘
 #define IMU_DIRECTION_xyz_XYZ
-// °²×°pitch¸¨Öú¶¯Á¦µç»ú
+// å®‰è£…pitchè¾…åŠ©åŠ¨åŠ›ç”µæœº
 #define PITCH_AUX
-// °²×°¸¨Öú·¢Éä»ú¹¹
+// å®‰è£…è¾…åŠ©å‘å°„æœºæž„
 #define SHOOTOR_AUX
-// µç»úID·ÖÅä
-#define YAW_MOTOR_ID                0x205
-#define PITCH_MOTOR_ID              0x206
-#define ROTOR_MOTOR_ID              0x208
-//#define ROTOR_MOTOR_ID              0x203
-#define AMMO_LEFT_MOTOR_ID          0x201
-#define AMMO_RIGHT_MOTOR_ID         0x202
-// pitch¸¨Öú¶¯Á¦µç»ú
-// ´Ëµç»úÓëpitchÖáÖ÷µç»ú°²×°·½ÏòÏà·´£¬Ö´ÐÐÁ¦¾ØÏàÍ¬£¬²»¹Ø×¢Æä±àÂëÆ÷
-#define PITCH_AUX_MOTOR_ID          0x207
-// ¸¨Öú·¢Éä»ú¹¹²¦ÅÌµç»ú
-// ´Ëµç»úÓëpitchÖáÖ÷µç»ú°²×°·½ÏòÏà·´£¬Ö´ÐÐÁ¦¾ØÏàÍ¬£¬²»¹Ø×¢Æä±àÂëÆ÷
-//#define ROTOR_AUX_MOTOR_ID          0x203
-// µç»ú°²×°·½Ïò
-// ÔÆÌ¨µç»úÕýÏòÔË¶¯·½ÏòºÍÔÆÌ¨×ËÌ¬£¨¿ØÖÆ£©×ø±êÏµÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// ²¦ÅÌµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯Íè½øÈëÇ¹¹Ü·½ÏòÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// Ä¦²ÁÂÖµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯µÀÍ¬ÏòÎª1£¬·´ÏòÎª-1
-#define YAW_MOTOR_DIRECTION         1
-#define PITCH_MOTOR_DIRECTION       1
-#define ROTOR_MOTOR_DIRECTION       -1
-#define AMMO_LEFT_MOTOR_DIRECTION   1
-#define AMMO_RIGHT_MOTOR_DIRECTION  -1
-// ¸¨Öú·¢Éä»ú¹¹²¦ÅÌµç»ú
-//#define ROTOR_AUX_MOTOR_DIRECTION   -1
-// ÔÆÌ¨YAWÖáÁãµãºÍ¸©ÑöÏÞ·ù
-#define YAW_ZERO_ECDANGLE           4.65820313f
-#define PITCH_MIN_ANGLE             -35.0f
-#define PITCH_MAX_ANGLE             18.0f
-// Ä¬ÈÏÄ¦²ÁÂÖËÙ¶È
-#define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_10MS
-#define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_10MS
-#define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_10MS
-// Í¨ÐÅcan×ÜÏßÎ»ÖÃ
-#define COMMUNICATE_CANPORT         hcan1
-
+// ç”µæœºIDåˆ†é…
+#define YAW_MOTOR_ID 0x205
+#define PITCH_MOTOR_ID 0x206
+#define ROTOR_MOTOR_ID 0x208
+// #define ROTOR_MOTOR_ID              0x203
+#define AMMO_LEFT_MOTOR_ID 0x201
+#define AMMO_RIGHT_MOTOR_ID 0x202
+// pitchè¾…åŠ©åŠ¨åŠ›ç”µæœº
+// æ­¤ç”µæœºä¸Žpitchè½´ä¸»ç”µæœºå®‰è£…æ–¹å‘ç›¸åï¼Œæ‰§è¡ŒåŠ›çŸ©ç›¸åŒï¼Œä¸å…³æ³¨å…¶ç¼–ç å™¨
+#define PITCH_AUX_MOTOR_ID 0x207
+// è¾…åŠ©å‘å°„æœºæž„æ‹¨ç›˜ç”µæœº
+// æ­¤ç”µæœºä¸Žpitchè½´ä¸»ç”µæœºå®‰è£…æ–¹å‘ç›¸åï¼Œæ‰§è¡ŒåŠ›çŸ©ç›¸åŒï¼Œä¸å…³æ³¨å…¶ç¼–ç å™¨
+// #define ROTOR_AUX_MOTOR_ID          0x203
+// ç”µæœºå®‰è£…æ–¹å‘
+// äº‘å°ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œäº‘å°å§¿æ€ï¼ˆæŽ§åˆ¶ï¼‰åæ ‡ç³»åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‹¨ç›˜ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹ä¸¸è¿›å…¥æžªç®¡æ–¹å‘åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‘©æ“¦è½®ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹é“åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+#define YAW_MOTOR_DIRECTION 1
+#define PITCH_MOTOR_DIRECTION 1
+#define ROTOR_MOTOR_DIRECTION -1
+#define AMMO_LEFT_MOTOR_DIRECTION 1
+#define AMMO_RIGHT_MOTOR_DIRECTION -1
+// è¾…åŠ©å‘å°„æœºæž„æ‹¨ç›˜ç”µæœº
+// #define ROTOR_AUX_MOTOR_DIRECTION   -1
+// äº‘å°YAWè½´é›¶ç‚¹å’Œä¿¯ä»°é™å¹…
+#define YAW_ZERO_ECDANGLE 4.65820313f
+#define PITCH_MIN_ANGLE -35.0f
+#define PITCH_MAX_ANGLE 18.0f
+// é»˜è®¤æ‘©æ“¦è½®é€Ÿåº¦
+#define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_10MS
+#define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_10MS
+#define DEFAULT_AMMO_SPEEDSET AMMO_SPEEDSET_10MS
+// é€šä¿¡canæ€»çº¿ä½ç½®
+#define COMMUNICATE_CANPORT hcan1
 
 #endif
 
 #ifdef HERO1_1
-// ²ÎÊýÅäÖÃÎÄ¼þ
+// å‚æ•°é…ç½®æ–‡ä»¶
 #define PARAMETER_FILE "Hero1_1Parameter.h"
-// ¼üÎ»ÅäÖÃÎÄ¼þ
+// é”®ä½é…ç½®æ–‡ä»¶
 #define KEYMAP_FILE "Hero1_1KeyMap.h"
-// imu°²×°·½Ïò
+// imuå®‰è£…æ–¹å‘
 #define IMU_DIRECTION_xzry_XYZ
-// µç»úID·ÖÅä
-#define YAW_MOTOR_ID                0x205
-#define PITCH_MOTOR_ID              0x206
-#define ROTOR_MOTOR_ID              0x207
-#define AMMO_LEFT_MOTOR_ID          0x201
-#define AMMO_RIGHT_MOTOR_ID         0x202
-// µç»ú°²×°·½Ïò
-// ÔÆÌ¨µç»úÕýÏòÔË¶¯·½ÏòºÍÔÆÌ¨×ËÌ¬£¨¿ØÖÆ£©×ø±êÏµÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// ²¦ÅÌµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯Íè½øÈëÇ¹¹Ü·½ÏòÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// Ä¦²ÁÂÖµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯µÀÍ¬ÏòÎª1£¬·´ÏòÎª-1
-#define YAW_MOTOR_DIRECTION         1
-#define PITCH_MOTOR_DIRECTION       -1
-#define ROTOR_MOTOR_DIRECTION       -1
-#define AMMO_LEFT_MOTOR_DIRECTION   1
-#define AMMO_RIGHT_MOTOR_DIRECTION  -1
-// ÔÆÌ¨YAWÖáÁãµãºÍ¸©ÑöÏÞ·ù
-#define YAW_ZERO_ECDANGLE           -114.873047f
-#define PITCH_MIN_ANGLE             -36.0f
-#define PITCH_MAX_ANGLE             26.0f
-// Ä¬ÈÏÄ¦²ÁÂÖËÙ¶È
-#define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_10MS
-#define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_10MS
-#define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_10MS
-// Í¨ÐÅcan×ÜÏßÎ»ÖÃ
-#define COMMUNICATE_CANPORT         hcan2
-
+// ç”µæœºIDåˆ†é…
+#define YAW_MOTOR_ID 0x205
+#define PITCH_MOTOR_ID 0x206
+#define ROTOR_MOTOR_ID 0x207
+#define AMMO_LEFT_MOTOR_ID 0x201
+#define AMMO_RIGHT_MOTOR_ID 0x202
+// ç”µæœºå®‰è£…æ–¹å‘
+// äº‘å°ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œäº‘å°å§¿æ€ï¼ˆæŽ§åˆ¶ï¼‰åæ ‡ç³»åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‹¨ç›˜ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹ä¸¸è¿›å…¥æžªç®¡æ–¹å‘åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‘©æ“¦è½®ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹é“åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+#define YAW_MOTOR_DIRECTION 1
+#define PITCH_MOTOR_DIRECTION -1
+#define ROTOR_MOTOR_DIRECTION -1
+#define AMMO_LEFT_MOTOR_DIRECTION 1
+#define AMMO_RIGHT_MOTOR_DIRECTION -1
+// äº‘å°YAWè½´é›¶ç‚¹å’Œä¿¯ä»°é™å¹…
+#define YAW_ZERO_ECDANGLE -114.873047f
+#define PITCH_MIN_ANGLE -36.0f
+#define PITCH_MAX_ANGLE 26.0f
+// é»˜è®¤æ‘©æ“¦è½®é€Ÿåº¦
+#define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_10MS
+#define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_10MS
+#define DEFAULT_AMMO_SPEEDSET AMMO_SPEEDSET_10MS
+// é€šä¿¡canæ€»çº¿ä½ç½®
+#define COMMUNICATE_CANPORT hcan2
 
 #endif
 
+// #ifdef INFANTRY5
 
-
-//#ifdef INFANTRY5
-
-//// ²ÎÊýÅäÖÃÎÄ¼þ
-//#define PARAMETER_FILE "Infantry4Parameter.h"
-//// ¼üÎ»ÅäÖÃÎÄ¼þ
-//#define KEYMAP_FILE "Infantry4KeyMap.h"
-//// imu°²×°·½Ïò
-//#define IMU_DIRECTION_xyz_XYZ
-//// µç»úID·ÖÅä
-//#define YAW_MOTOR_ID                0x205
-//#define PITCH_MOTOR_ID              0x206
-//#define ROTOR_MOTOR_ID              0x203
-//#define AMMO_LEFT_MOTOR_ID          0x201
-//#define AMMO_RIGHT_MOTOR_ID         0x202
-//// µç»ú°²×°·½Ïò
-//// ÔÆÌ¨µç»úÕýÏòÔË¶¯·½ÏòºÍÔÆÌ¨×ËÌ¬£¨¿ØÖÆ£©×ø±êÏµÍ¬ÏòÎª1£¬·´ÏòÎª-1
-//// ²¦ÅÌµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯Íè½øÈëÇ¹¹Ü·½ÏòÍ¬ÏòÎª1£¬·´ÏòÎª-1
-//// Ä¦²ÁÂÖµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯µÀÍ¬ÏòÎª1£¬·´ÏòÎª-1
-//#define YAW_MOTOR_DIRECTION         1
-//#define PITCH_MOTOR_DIRECTION       -1
-//#define ROTOR_MOTOR_DIRECTION       1
-//#define AMMO_LEFT_MOTOR_DIRECTION   -1
-//#define AMMO_RIGHT_MOTOR_DIRECTION  1
-//// ÔÆÌ¨YAWÖáÁãµãºÍ¸©ÑöÏÞ·ù
-//#define YAW_ZERO_ECDANGLE           2.72460938f
-//#define PITCH_MIN_ANGLE             -20.0f
-//#define PITCH_MAX_ANGLE             20.0f
-//// Ä¬ÈÏÄ¦²ÁÂÖËÙ¶È
-//#define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_15MS
-//#define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_15MS
-//#define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_15MS
-//// Í¨ÐÅcan×ÜÏßÎ»ÖÃ
-//#define COMMUNICATE_CANPORT         hcan2
-//#endif
+//// å‚æ•°é…ç½®æ–‡ä»¶
+// #define PARAMETER_FILE "Infantry4Parameter.h"
+//// é”®ä½é…ç½®æ–‡ä»¶
+// #define KEYMAP_FILE "Infantry4KeyMap.h"
+//// imuå®‰è£…æ–¹å‘
+// #define IMU_DIRECTION_xyz_XYZ
+//// ç”µæœºIDåˆ†é…
+// #define YAW_MOTOR_ID                0x205
+// #define PITCH_MOTOR_ID              0x206
+// #define ROTOR_MOTOR_ID              0x203
+// #define AMMO_LEFT_MOTOR_ID          0x201
+// #define AMMO_RIGHT_MOTOR_ID         0x202
+//// ç”µæœºå®‰è£…æ–¹å‘
+//// äº‘å°ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œäº‘å°å§¿æ€ï¼ˆæŽ§åˆ¶ï¼‰åæ ‡ç³»åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+//// æ‹¨ç›˜ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹ä¸¸è¿›å…¥æžªç®¡æ–¹å‘åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+//// æ‘©æ“¦è½®ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹é“åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// #define YAW_MOTOR_DIRECTION         1
+// #define PITCH_MOTOR_DIRECTION       -1
+// #define ROTOR_MOTOR_DIRECTION       1
+// #define AMMO_LEFT_MOTOR_DIRECTION   -1
+// #define AMMO_RIGHT_MOTOR_DIRECTION  1
+//// äº‘å°YAWè½´é›¶ç‚¹å’Œä¿¯ä»°é™å¹…
+// #define YAW_ZERO_ECDANGLE           2.72460938f
+// #define PITCH_MIN_ANGLE             -20.0f
+// #define PITCH_MAX_ANGLE             20.0f
+//// é»˜è®¤æ‘©æ“¦è½®é€Ÿåº¦
+// #define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_15MS
+// #define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_15MS
+// #define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_15MS
+//// é€šä¿¡canæ€»çº¿ä½ç½®
+// #define COMMUNICATE_CANPORT         hcan2
+// #endif
 
 #ifdef INFANTRY5
 
-// 2?¨ºy???????t
+// 2?Ãªy???????t
 #define PARAMETER_FILE "Infantry5Parameter.h"
-// ?¨¹?????????t
+// ?Ã¼?????????t
 #define KEYMAP_FILE "Infantry4KeyMap.h"
-// imu¡ã2¡Á¡ã¡¤??¨°
+// imuÂ°2Ã—Â°Â·??Ã²
 #define IMU_DIRECTION_zryx_XYZ
-// gyro yaw?¨¢????
-#define GYRO_YAW_BIAS -0.0025f//055f
-// ?¡Â¡¤¡é¨¦??¨²11¨¤¨¤D¨ª
+// gyro yaw?Ã¡????
+#define GYRO_YAW_BIAS -0.0025f // 055f
+// ?Ã·Â·ï¿ Ã©??Ãº11Ã Ã DÃ­
 #define MAIN_SHOOTER_TYPE_NORMAL
-//#define MAIN_SHOOTER_TYPE_HEAVY
-// ¦Ì??¨²ID¡¤???
-#define YAW_MOTOR_ID                0x205
-#define PITCH_MOTOR_ID              0x206
-#define ROTOR_MOTOR_ID              0x203
-#define AMMO_LEFT_MOTOR_ID          0x201
-#define AMMO_RIGHT_MOTOR_ID         0x202
-// ¦Ì??¨²¡ã2¡Á¡ã¡¤??¨°
-// ??¨¬¡§¦Ì??¨²?y?¨°???¡¥¡¤??¨°o¨ª??¨¬¡§¡Á?¨¬?¡ê¡§????¡ê¡Á?¡À¨º?¦Ì¨ª??¨°?a1¡ê?¡¤¡ä?¨°?a-1
-// 2|?¨¬¦Ì??¨²?y?¨°???¡¥¡¤??¨°o¨ª¦Ì¡¥¨ª¨¨??¨¨??11¨¹¡¤??¨°¨ª??¨°?a1¡ê?¡¤¡ä?¨°?a-1
-// ?|2¨¢??¦Ì??¨²?y?¨°???¡¥¡¤??¨°o¨ª¦Ì¡¥¦Ì¨¤¨ª??¨°?a1¡ê?¡¤¡ä?¨°?a-1
-#define YAW_MOTOR_DIRECTION         1
-#define PITCH_MOTOR_DIRECTION       1
-#define ROTOR_MOTOR_DIRECTION       -1
-#define AMMO_LEFT_MOTOR_DIRECTION   -1
-#define AMMO_RIGHT_MOTOR_DIRECTION  1
-// ??¨¬¡§YAW?¨¢¨¢?¦Ì?o¨ª????T¡¤¨´
-#define YAW_ZERO_ECDANGLE           19.0f//-144.102539f
-#define PITCH_MIN_ANGLE             -19.5f//-31.0f
-#define PITCH_MAX_ANGLE             25.0f//15.0f//18.0f
-// ??¨¨??|2¨¢???¨´?¨¨
-#define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_15MS
-#define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_15MS
-#define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_15MS
-// ¨ª¡§D?can¡Á¨¹??????
-#define COMMUNICATE_CANPORT         hcan1
+// #define MAIN_SHOOTER_TYPE_HEAVY
+//  Î¼??ÃºIDÂ·???
+#define YAW_MOTOR_ID 0x205
+#define PITCH_MOTOR_ID 0x206
+#define ROTOR_MOTOR_ID 0x203
+#define AMMO_LEFT_MOTOR_ID 0x201
+#define AMMO_RIGHT_MOTOR_ID 0x202
+// Î¼??ÃºÂ°2Ã—Â°Â·??Ã²
+// ??Ã¬Â¨Î¼??Ãº?y?Ã²???Ë‰Â·??Ã²oÃ­??Ã¬Â¨Ã—?Ã¬?ï¿¡Â¨????ï¿¡Ã—?Â±Ãª?Î¼Ã­??Ã²?a1ï¿¡?Â·â€²?Ã²?a-1
+// 2|?Ã¬Î¼??Ãº?y?Ã²???Ë‰Â·??Ã²oÃ­Î¼Ë‰Ã­Ã¨??Ã¨??11Ã¼Â·??Ã²Ã­??Ã²?a1ï¿¡?Â·â€²?Ã²?a-1
+// ?|2Ã¡??Î¼??Ãº?y?Ã²???Ë‰Â·??Ã²oÃ­Î¼Ë‰Î¼Ã Ã­??Ã²?a1ï¿¡?Â·â€²?Ã²?a-1
+#define YAW_MOTOR_DIRECTION 1
+#define PITCH_MOTOR_DIRECTION 1
+#define ROTOR_MOTOR_DIRECTION -1
+#define AMMO_LEFT_MOTOR_DIRECTION -1
+#define AMMO_RIGHT_MOTOR_DIRECTION 1
+// ??Ã¬Â¨YAW?Ã¡Ã¡?Î¼?oÃ­????TÂ·Ã¹
+#define YAW_ZERO_ECDANGLE 19.0f //-144.102539f
+#define PITCH_MIN_ANGLE -19.5f  //-31.0f
+#define PITCH_MAX_ANGLE 25.0f   // 15.0f//18.0f
+// ??Ã¨??|2Ã¡???Ã¹?Ã¨
+#define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_15MS
+#define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_15MS
+#define DEFAULT_AMMO_SPEEDSET AMMO_SPEEDSET_15MS
+// Ã­Â¨D?canÃ—Ã¼??????
+#define COMMUNICATE_CANPORT hcan1
 #endif
-
-
 
 #ifdef HERO1_2
-// ²ÎÊýÅäÖÃÎÄ¼þ
+// å‚æ•°é…ç½®æ–‡ä»¶
 #define PARAMETER_FILE "Hero1_1Parameter.h"
-// imu°²×°·½Ïò
+// imuå®‰è£…æ–¹å‘
 #define IMU_DIRECTION_xyz_XYZ
-// µç»úID·ÖÅä
-#define YAW_MOTOR_ID                0x205
-#define PITCH_MOTOR_ID              0x206
-#define ROTOR_MOTOR_ID              0x207
-#define AMMO_LEFT_MOTOR_ID          0x201
-#define AMMO_RIGHT_MOTOR_ID         0x202
-// µç»ú°²×°·½Ïò
-// ÔÆÌ¨µç»úÕýÏòÔË¶¯·½ÏòºÍÔÆÌ¨×ËÌ¬£¨¿ØÖÆ£©×ø±êÏµÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// ²¦ÅÌµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯Íè½øÈëÇ¹¹Ü·½ÏòÍ¬ÏòÎª1£¬·´ÏòÎª-1
-// Ä¦²ÁÂÖµç»úÕýÏòÔË¶¯·½ÏòºÍµ¯µÀÍ¬ÏòÎª1£¬·´ÏòÎª-1
-#define YAW_MOTOR_DIRECTION         1
-#define PITCH_MOTOR_DIRECTION       -1
-#define ROTOR_MOTOR_DIRECTION       -1
-#define AMMO_LEFT_MOTOR_DIRECTION   1
-#define AMMO_RIGHT_MOTOR_DIRECTION  -1
-// ÔÆÌ¨YAWÖáÁãµãºÍ¸©ÑöÏÞ·ù
-#define YAW_ZERO_ECDANGLE           -164.223633f
-#define PITCH_MIN_ANGLE             -36.0f
-#define PITCH_MAX_ANGLE             26.0f
-// Ä¬ÈÏÄ¦²ÁÂÖËÙ¶È
-#define DEFAULT_AMMOL_PID           AMMO_LEFT_SPEED_10MS
-#define DEFAULT_AMMOR_PID           AMMO_RIGHT_SPEED_10MS
-#define DEFAULT_AMMO_SPEEDSET       AMMO_SPEEDSET_10MS
-// Í¨ÐÅcan×ÜÏßÎ»ÖÃ
-#define COMMUNICATE_CANPORT         hcan2
-
+// ç”µæœºIDåˆ†é…
+#define YAW_MOTOR_ID 0x205
+#define PITCH_MOTOR_ID 0x206
+#define ROTOR_MOTOR_ID 0x207
+#define AMMO_LEFT_MOTOR_ID 0x201
+#define AMMO_RIGHT_MOTOR_ID 0x202
+// ç”µæœºå®‰è£…æ–¹å‘
+// äº‘å°ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œäº‘å°å§¿æ€ï¼ˆæŽ§åˆ¶ï¼‰åæ ‡ç³»åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‹¨ç›˜ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹ä¸¸è¿›å…¥æžªç®¡æ–¹å‘åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+// æ‘©æ“¦è½®ç”µæœºæ­£å‘è¿åŠ¨æ–¹å‘å’Œå¼¹é“åŒå‘ä¸º1ï¼Œåå‘ä¸º-1
+#define YAW_MOTOR_DIRECTION 1
+#define PITCH_MOTOR_DIRECTION -1
+#define ROTOR_MOTOR_DIRECTION -1
+#define AMMO_LEFT_MOTOR_DIRECTION 1
+#define AMMO_RIGHT_MOTOR_DIRECTION -1
+// äº‘å°YAWè½´é›¶ç‚¹å’Œä¿¯ä»°é™å¹…
+#define YAW_ZERO_ECDANGLE -164.223633f
+#define PITCH_MIN_ANGLE -36.0f
+#define PITCH_MAX_ANGLE 26.0f
+// é»˜è®¤æ‘©æ“¦è½®é€Ÿåº¦
+#define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_10MS
+#define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_10MS
+#define DEFAULT_AMMO_SPEEDSET AMMO_SPEEDSET_10MS
+// é€šä¿¡canæ€»çº¿ä½ç½®
+#define COMMUNICATE_CANPORT hcan2
 
 #endif
 
-#ifdef ENGINEER2
+#ifdef ENGINEER2_0
 
 #ifdef MUC1
-#define PARAMETER_FILE "ENGINEER2_1Parameter.h"
+#define PARAMETER_FILE "ENGINEER2_0_1Parameter.h"
 #define KEYMAP_FILE "ENGINEER2Keymap.h"
-#elif defined MUC2
-#define PARAMETER_FILE "ENGINEER2_2Parameter.h"
+#elif defined(MUC2)
+#define PARAMETER_FILE "ENGINEER2_0_2Parameter.h"
 #define KEYMAP_FILE "ENGINEER2Keymap.h"
 #endif
 
 #endif
 
-//#define IMU_DIRECTION_xyz_XYZ
-//#define IMU_DIRECTION_yrxz_XYZ
-//#define IMU_DIRECTION_rxryz_XYZ
-//#define IMU_DIRECTION_ryxz_XYZ
+#ifdef ENGINEER2_1
 
-//#define IMU_DIRECTION_zryx_XYZ
-//#define IMU_DIRECTION_yzx_XYZ
-//#define IMU_DIRECTION_rzyx_XYZ
-//#define IMU_DIRECTION_ryrzx_XYZ
-
-
-
+#ifdef MUC1
+#define PARAMETER_FILE "ENGINEER2_1_1Parameter.h"
+#define KEYMAP_FILE "ENGINEER2Keymap.h"
+#elif defined(MUC2)
+#define PARAMETER_FILE "ENGINEER2_1_2Parameter.h"
+#define KEYMAP_FILE "ENGINEER2Keymap.h"
+#endif
 
 #endif
 
+// #define IMU_DIRECTION_xyz_XYZ
+// #define IMU_DIRECTION_yrxz_XYZ
+// #define IMU_DIRECTION_rxryz_XYZ
+// #define IMU_DIRECTION_ryxz_XYZ
+
+// #define IMU_DIRECTION_zryx_XYZ
+// #define IMU_DIRECTION_yzx_XYZ
+// #define IMU_DIRECTION_rzyx_XYZ
+// #define IMU_DIRECTION_ryrzx_XYZ
+
+#endif

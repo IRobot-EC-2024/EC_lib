@@ -13,15 +13,30 @@
 #ifndef BSP_CAN_H__
 #define BSP_CAN_H__
 
-#include "struct_typedef.h"
+#if defined(STM32F407xx) || defined(STM32F427xx)
+#define CAN_DEVICE
+#elif defined(STM32H723xx)
+#define FDCAN_DEVICE
+#endif
+
+#ifdef CAN_DEVICE
 #include "can.h"
+#elif defined(FDCAN_DEVICE)
+#include "fdcan.h"
+#endif
+
+#include "struct_typedef.h"
 
 #define CAN_MX_REGISTER_CNT 16
 
 typedef struct Can_Device_ {
-
+	#ifdef CAN_DEVICE
     CAN_HandleTypeDef *can_handle; // can句柄
     CAN_TxHeaderTypeDef tx_config;    // CAN报文发送配置
+	#elif defined(FDCAN_DEVICE)
+	FDCAN_HandleTypeDef *can_handle;// fdcan句柄
+	FDCAN_TxHeaderTypeDef tx_config;// fdcan报文发送配置
+	#endif
     uint32_t tx_id;                // 发送id
     uint32_t tx_mailbox;           // CAN消息填入的邮箱号
     uint8_t tx_buff[8];            // 发送缓存
@@ -35,7 +50,11 @@ typedef struct Can_Device_ {
 }Can_Device_t;
 
 typedef struct{
+	#ifdef CAN_DEVICE
     CAN_HandleTypeDef *can_handle;              // can句柄
+	#elif defined(FDCAN_DEVICE)
+	FDCAN_HandleTypeDef *can_handle;// fdcan句柄
+	#endif
     uint32_t tx_id;                             // 发送id
     uint32_t rx_id;                              // 接收id
     uint8_t tx_dlc;                         

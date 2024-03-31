@@ -18,6 +18,14 @@ static Timer_Device_t *timer_device[TIMER_DEVICE_CNT] = {NULL};
 static uint8_t id_cnt=0; 
 static uint32_t timerSelectTclk(TIM_HandleTypeDef *htim );
 
+#if defined(STM32F407xx) || defined(STM32F427xx) 
+	#define PCLK1_MULT (APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE1)>> RCC_CFGR_PPRE1_Pos] == 0 ? 1 : 2)
+	#define PCLK2_MULT (APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE2)>> RCC_CFGR_PPRE2_Pos] == 0 ? 1 : 2)
+#elif defined(STM32H723xx)
+	#define PCLK1_MULT (D1CorePrescTable[(RCC->CFGR & RCC_D2CFGR_D2PPRE1)>> RCC_D2CFGR_D2PPRE1_Pos] == 0 ? 1 : 2)
+	#define PCLK2_MULT (D1CorePrescTable[(RCC->CFGR & RCC_D2CFGR_D2PPRE2)>> RCC_D2CFGR_D2PPRE2_Pos] == 0 ? 1 : 2)
+#endif
+
 static uint32_t timerSelectTclk(TIM_HandleTypeDef *htim )
 {
     uintptr_t tclk_temp  = ((uintptr_t)((htim)->Instance));
@@ -25,7 +33,7 @@ static uint32_t timerSelectTclk(TIM_HandleTypeDef *htim )
             (tclk_temp <= (APB1PERIPH_BASE + 0x2000UL)) &&
             (tclk_temp >= (APB1PERIPH_BASE + 0x0000UL)))
     {
-        return (HAL_RCC_GetPCLK1Freq() * (APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE1)>> RCC_CFGR_PPRE1_Pos] == 0 ? 1 : 2));
+        return (HAL_RCC_GetPCLK1Freq() * PCLK1_MULT);
     }
     else if (
             ((tclk_temp <= (APB2PERIPH_BASE + 0x0400UL)) &&
@@ -33,7 +41,7 @@ static uint32_t timerSelectTclk(TIM_HandleTypeDef *htim )
             ((tclk_temp <= (APB2PERIPH_BASE + 0x4800UL)) &&
              (tclk_temp >= (APB2PERIPH_BASE + 0x4000UL))))
     {
-        return (HAL_RCC_GetPCLK2Freq() * (APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE1)>> RCC_CFGR_PPRE1_Pos] == 0 ? 1 : 2));
+        return (HAL_RCC_GetPCLK2Freq() * PCLK2_MULT);
     }
     return 0;
 }
