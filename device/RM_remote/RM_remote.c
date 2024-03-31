@@ -160,9 +160,9 @@ void sbus_to_rc(uint8_t DmaBufNmb) {
 }
 
 bool_t CheckKeyPress(uint16_t Key) {
-    if ((remote_instance->state_interfaces.key.v & Key) == 0) return 0;
+    if ((remote_instance->state_interfaces.key.v & Key) == Key) return 1;
 
-    return 1;
+    return 0;
 }
 bool_t CheakKeyPressOnce(uint16_t Key) {
     if ((remote_instance->state_interfaces.key.v & Key) == 0) {
