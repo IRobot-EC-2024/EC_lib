@@ -90,7 +90,7 @@ void motorEnable(Motor_t *motor);
 void motorDisable(Motor_t *motor);
 
 Return_t motorSendMessage(Motor_t *motor);
-Return_t motorSendAll();
+Return_t motorSendAll(const uint32_t mask_cmd);
 
 //也可以使用以下函数发送
 extern Return_t djiMotorSendMessage();
