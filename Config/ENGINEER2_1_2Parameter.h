@@ -13,21 +13,21 @@
 #define BACK_ECD -75.0
 
 // 小资源岛升降高度
-#define LITTLE_ISLAND_OF_RESOURCES_0 Lift_motor_start_angle[0] + 230
-#define LITTLE_ISLAND_OF_RESOURCES_1 Lift_motor_start_angle[1] - 230
+#define LITTLE_ISLAND_OF_RESOURCES_0 Lift_motor_start_angle[0] - 230
+#define LITTLE_ISLAND_OF_RESOURCES_1 Lift_motor_start_angle[1] + 230
 // 大资源岛升降高度
-#define BIG_ISLAND_OF_RESOURCES_0 Lift_motor_start_angle[0] + 230
-#define BIG_ISLAND_OF_RESOURCES_1 Lift_motor_start_angle[1] - 230
+#define BIG_ISLAND_OF_RESOURCES_0 Lift_motor_start_angle[0] - 230
+#define BIG_ISLAND_OF_RESOURCES_1 Lift_motor_start_angle[1] + 230
 // 存矿高度
-#define SAVE_MINE_HEIGHT_0 Lift_motor_start_angle[0] + 260
-#define SAVE_MINE_HEIGHT_1 Lift_motor_start_angle[1] - 260
+#define SAVE_MINE_HEIGHT_0 Lift_motor_start_angle[0] - 260
+#define SAVE_MINE_HEIGHT_1 Lift_motor_start_angle[1] + 260
 // 抬矿
-#define LIFT_MINE_HEIGHT_0 Lift_motor_start_angle[0] + 340
-#define LIFT_MINE_HEIGHT_1 Lift_motor_start_angle[1] - 340
+#define LIFT_MINE_HEIGHT_0 Lift_motor_start_angle[0] - 340
+#define LIFT_MINE_HEIGHT_1 Lift_motor_start_angle[1] + 340
 
 // 兑换站大致高度
-#define EXCHANGE_STATION_HEIGHT_0 Lift_motor_start_angle[0] + 280
-#define EXCHANGE_STATION_HEIGHT_1 Lift_motor_start_angle[0] - 280
+#define EXCHANGE_STATION_HEIGHT_0 Lift_motor_start_angle[0] - 280
+#define EXCHANGE_STATION_HEIGHT_1 Lift_motor_start_angle[0] + 280
 
 // 保持时的目标速度
 #define LEFT_MAINTAIN_SPEED -5
