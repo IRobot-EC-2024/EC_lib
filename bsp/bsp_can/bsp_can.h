@@ -1,15 +1,12 @@
-//=====================================================================================================
-// bsp_can.h
-//=====================================================================================================
-//
-//       IRobot  EC_lib
-//
-// GitHub: https://github.com/Specific_Cola
-// question:  specificcola@proton.me
-// Date			Author			Notes
-//
-//
-//=====================================================================================================
+/**
+ * @Author       : Specific-Cola specificcola@proton.me
+ * @Date         : 2024-04-01 00:23:00
+ * @LastEditors  : H0pefu12 147677733+H0pefu12@users.noreply.github.com
+ * @LastEditTime : 2024-04-03 13:21:22
+ * @Description  :
+ * @Filename     : bsp_can.h
+ * @       IRobot  EC_lib
+ */
 #ifndef BSP_CAN_H__
 #define BSP_CAN_H__
 
@@ -30,11 +27,14 @@
 #include "fdcan.h"
 #endif
 
+#include "bsp_monitor.h"
 #include "struct_typedef.h"
 
-#define CAN_MX_REGISTER_CNT 16
+#define CAN_MX_REGISTER_CNT 40
 
 typedef struct Can_Device_ {
+    State_t state;  // 设备状态
+
 #ifdef CAN_DEVICE
     CAN_HandleTypeDef* can_handle;  // can句柄
     CAN_TxHeaderTypeDef tx_config;  // CAN报文发送配置
@@ -48,8 +48,16 @@ typedef struct Can_Device_ {
     uint32_t rx_id;       // 接收id
     uint8_t rx_buff[8];   // 接收缓存,最大消息长度为8
     uint8_t rx_len;       // 接收长度,可能为0-8
+
     // 接收的回调函数,用于解析接收到的数据
     void (*can_device_callback)(struct Can_Device_*);
+    // 离线回调处理
+    void (*can_device_offline_callback)(struct Can_Device_*);
+
+    void* parent;  // 父对象,用于回调函数中使用
+
+    Monitor_Device_t* monitor_handle;  // 监测器
+
 } Can_Device_t;
 
 typedef struct {
@@ -61,7 +69,11 @@ typedef struct {
     uint32_t tx_id;  // 发送id
     uint32_t rx_id;  // 接收id
     uint8_t tx_dlc;
+	uint16_t offline_threshold;//单位ms
     void (*can_device_callback)(Can_Device_t*);  // 处理接收数据的回调函数
+    void (*can_device_offline_callback)(Can_Device_t*);
+
+    void* parent;  // 父对象,用于回调函数中使用
 } Can_Register_t;
 
 extern void canFilterConfig(Can_Device_t* device);
