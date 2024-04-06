@@ -22,18 +22,16 @@ static uint8_t id_cnt;  // 记录大疆电机数量
 
 static uint8_t motor_send_buffer[8];
 
-static void rmdMotorCallback(Can_Device_t* instance) {
-    for (uint8_t i = 0; i < id_cnt; i++) {
-        if (instance == rmd_motor[i]->can_info) {
-            rmdMotorInfoUpdate(rmd_motor[i], instance->rx_buff);
+static void rmdMotorCallback(Can_Device_t* can_device) {
+    if (can_device == NULL) return;
 
-            if (rmd_motor[i]->motorCallback != NULL) {
-                rmd_motor[i]->motorCallback(rmd_motor[i]);
-            }
+    RMD_Motor_t* motor = can_device->parent;
+    rmdMotorInfoUpdate(motor, can_device->rx_buff);
 
-            break;
-        }
+    if (motor->motorCallback != NULL) {
+        motor->motorCallback(motor);
     }
+    motor->statu = STATE_ONLINE;
 }
 
 RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
@@ -49,7 +47,6 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
     can_reg.can_handle = reg->can_handle;
     can_reg.tx_dlc = 8;
     can_reg.can_device_callback = rmdMotorCallback;
-
     switch (reg->motor_type) {
         case RMD_MOTOR_4015:
             can_reg.rx_id = 0x140 + reg->id;
@@ -59,6 +56,7 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
             Error_Handler();  // 电机类型不存在
             break;
     }
+    can_reg.parent = motor;
 
     motor->motor_type = reg->motor_type;
     motor->can_info = canDeviceRegister(&can_reg);
@@ -69,7 +67,7 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
 }
 
 Return_t rmdMotorSendMessage(RMD_Motor_t* motor) {
-    if (motor->statu == OFFLINE) {
+    if (motor->statu == STATE_OFFLINE) {
         memset(&motor->command_interfaces, 0,
                sizeof(motor->command_interfaces));
         return RETURN_ERROR;
