@@ -34,7 +34,6 @@ RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg) {
     usart.rx_len = RC_FRAME_LENGTH;
     usart.usart_device_callback = rmRemoteCallback;
     remote->usart_info = usartDeviceRegister(&usart);
-	
 
     remote_instance = remote;
     return remote;
@@ -159,11 +158,18 @@ void sbus_to_rc(uint8_t DmaBufNmb) {
         (remote_instance->state_interfaces.key.v ^ KeyFormerChannal);
 }
 
+bool_t CheckKeyPressPart(uint16_t Key) {
+    if ((remote_instance->state_interfaces.key.v & Key) == 0) return 0;
+
+    return 1;
+}
+
 bool_t CheckKeyPress(uint16_t Key) {
     if ((remote_instance->state_interfaces.key.v & Key) == Key) return 1;
 
     return 0;
 }
+
 bool_t CheakKeyPressOnce(uint16_t Key) {
     if ((remote_instance->state_interfaces.key.v & Key) == 0) {
         KeyUsed &= (~Key);
