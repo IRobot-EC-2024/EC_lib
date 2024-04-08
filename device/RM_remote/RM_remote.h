@@ -89,7 +89,8 @@ void solveRCLost(void);
 void solveDataError(void);
 void sbus_to_rc(uint8_t dambufnum);
 
-extern bool_t CheckKeyPress(uint16_t Key);      // 长按触发
+extern bool_t CheckKeyPressPart(uint16_t Key);  // 长按触发,部分匹配
+extern bool_t CheckKeyPress(uint16_t Key);      // 长按触发,完全匹配
 extern bool_t CheckKeyPressOnce(uint16_t Key);  // 边沿触发
 // 归一化摇杆值
 extern fp32 RemoteChannalRightX();

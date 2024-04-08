@@ -1,10 +1,11 @@
 /**
- * @Author       : Specific-Cola 1528284020@qq.com
- * @Date         : 2024-04-01 00:59:52
+ * @Author       : Specific-Cola specificcola@proton.me
+ * @Date         : 2024-03-22 23:03:00
  * @LastEditors  : H0pefu12 147677733+H0pefu12@users.noreply.github.com
- * @LastEditTime : 2024-04-01 20:33:28
+ * @LastEditTime : 2024-04-03 13:19:33
  * @Description  :
  * @Filename     : bsp_can.c
+ * @       IRobot  EC_lib
  */
 #include "bsp_can.h"
 
@@ -13,12 +14,20 @@
 
 #include "main.h"
 
-static Can_Device_t* can_device[CAN_MX_REGISTER_CNT] = {NULL};
+static Can_Device_t* can_devices[CAN_MX_REGISTER_CNT] = {NULL};
 static uint8_t id_cnt;  // 全局CAN实例索引,每次有新的模块注册会自增
 
-void canFilterConfig(
-    Can_Device_t* device)  // todo  :  后面滤波器配置一下，保证can稳定传输
-{
+static void canOfflineCallback(Monitor_Device_t* monitor_device) {
+    Can_Device_t* can_device = monitor_device->device;
+
+    can_device->state = STATE_OFFLINE;
+    if (can_device->can_device_offline_callback != NULL) {
+        can_device->can_device_offline_callback(can_device);
+    }
+}
+
+void canFilterConfig(Can_Device_t* device) {
+    // todo:后面滤波器配置一下，保证can稳定传输
 #if defined(CAN_DEVICE)
 
     CAN_FilterTypeDef can_filter_config;
@@ -69,9 +78,9 @@ Can_Device_t* canDeviceRegister(Can_Register_t* reg) {
     }
 
     for (uint8_t i = 0; i < id_cnt; i++) {
-        if (can_device[i]->rx_id == reg->rx_id &&
-            can_device[i]->can_handle == reg->can_handle &&
-            can_device[i]->tx_id == reg->tx_id) {
+        if (can_devices[i]->rx_id == reg->rx_id &&
+            can_devices[i]->can_handle == reg->can_handle &&
+            can_devices[i]->tx_id == reg->tx_id) {
             Error_Handler();
         }
     }
@@ -109,9 +118,17 @@ Can_Device_t* canDeviceRegister(Can_Register_t* reg) {
     instance->tx_id = reg->tx_id;  // 好像没用,可以删掉
     instance->rx_id = reg->rx_id;
     instance->can_device_callback = reg->can_device_callback;
+    instance->parent = reg->parent;
 
-    canFilterConfig(instance);        // 添加CAN过滤器规则
-    can_device[id_cnt++] = instance;  // 将实例保存到can_instance中
+    Monitor_Register_t monitor_reg;
+
+    monitor_reg.device = instance;
+    monitor_reg.offlineCallback = canOfflineCallback;
+    monitor_reg.offline_threshold = reg->offline_threshold;
+    instance->monitor_handle = monitorInit(&monitor_reg);
+
+    canFilterConfig(instance);         // 添加CAN过滤器规则
+    can_devices[id_cnt++] = instance;  // 将实例保存到can_instance中
 
     canOnActivate();
 
@@ -183,17 +200,20 @@ static void canReceiveMessage(CAN_HandleTypeDef* hcan) {
         HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_config,
                              can_rx_buff);  // 从FIFO中获取数据
         for (uint8_t i = 0; i < id_cnt; i++) {  // 两者相等说明这是要找的实例
-            if (hcan == can_device[i]->can_handle &&
-                rx_config.StdId == can_device[i]->rx_id) {
-                if (can_device[i]->can_device_callback !=
-                    NULL)  // 回调函数不为空就调用
-                {
-                    can_device[i]->rx_len =
-                        rx_config.DLC;  // 保存接收到的数据长度
-                    memcpy(can_device[i]->rx_buff, can_rx_buff,
-                           rx_config.DLC);  // 消息拷贝到对应实例
-                    can_device[i]->can_device_callback(
-                        can_device[i]);  // 触发回调进行数据解析和处理
+            if (hcan == can_devices[i]->can_handle &&
+                rx_config.StdId == can_devices[i]->rx_id) {
+                can_devices[i]->state = STATE_ONLINE;
+                monitorRefresh(can_devices[i]->monitor_handle);
+
+                // 回调函数不为空就调用
+                if (can_devices[i]->can_device_callback != NULL) {
+                    // 保存接收到的数据长度
+                    can_devices[i]->rx_len = rx_config.DLC;
+                    // 消息拷贝到对应实例
+                    memcpy(can_devices[i]->rx_buff, can_rx_buff,
+                           can_devices[i]->rx_len);
+                    // 触发回调进行数据解析和处理
+                    can_devices[i]->can_device_callback(can_devices[i]);
                 }
                 return;
             }
@@ -204,6 +224,7 @@ static void canReceiveMessage(CAN_HandleTypeDef* hcan) {
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
     canReceiveMessage(hcan);
 }
+
 #elif defined(FDCAN_DEVICE)
 static void canReceiveMessage(FDCAN_HandleTypeDef* hfdcan) {
     static FDCAN_RxHeaderTypeDef rx_config;
@@ -214,16 +235,20 @@ static void canReceiveMessage(FDCAN_HandleTypeDef* hfdcan) {
         HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rx_config,
                                can_rx_buff);  // 从FIFO中获取数据
         for (uint8_t i = 0; i < id_cnt; i++) {  // 两者相等说明这是要找的实例
-            if (hfdcan == can_device[i]->can_handle &&
-                rx_config.Identifier == can_device[i]->rx_id) {
+            if (hfdcan == can_devices[i]->can_handle &&
+                rx_config.Identifier == can_devices[i]->rx_id) {
+                can_devices[i]->state = STATE_ONLINE;
+                monitorRefresh(can_devices[i]->monitor_handle);
+
                 // 回调函数不为空就调用
-                if (can_device[i]->can_device_callback != NULL) {
+                if (can_devices[i]->can_device_callback != NULL) {
                     // 保存接收到的数据长度
-                    can_device[i]->rx_len = rx_config.DataLength >> 16;
-                    memcpy(can_device[i]->rx_buff, can_rx_buff,
-                           rx_config.DataLength >> 16);  // 消息拷贝到对应实例
-                    can_device[i]->can_device_callback(
-                        can_device[i]);  // 触发回调进行数据解析和处理
+                    can_devices[i]->rx_len = rx_config.DataLength >> 16;
+                    // 消息拷贝到对应实例
+                    memcpy(can_devices[i]->rx_buff, can_rx_buff,
+                           can_devices[i]->rx_len);
+                    // 触发回调进行数据解析和处理
+                    can_devices[i]->can_device_callback(can_devices[i]);
                 }
                 return;
             }

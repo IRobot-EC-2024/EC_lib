@@ -158,11 +158,18 @@ void sbus_to_rc(uint8_t DmaBufNmb) {
         (remote_instance->state_interfaces.key.v ^ KeyFormerChannal);
 }
 
+bool_t CheckKeyPressPart(uint16_t Key) {
+    if ((remote_instance->state_interfaces.key.v & Key) == 0) return 0;
+
+    return 1;
+}
+
 bool_t CheckKeyPress(uint16_t Key) {
     if ((remote_instance->state_interfaces.key.v & Key) == Key) return 1;
 
     return 0;
 }
+
 bool_t CheakKeyPressOnce(uint16_t Key) {
     if ((remote_instance->state_interfaces.key.v & Key) == 0) {
         KeyUsed &= (~Key);
