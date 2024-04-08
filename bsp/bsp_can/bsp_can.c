@@ -1,11 +1,12 @@
 /**
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-03-22 23:03:00
- * @LastEditors  : H0pefu12 147677733+H0pefu12@users.noreply.github.com
- * @LastEditTime : 2024-04-03 13:19:33
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 13:41:08
  * @Description  :
  * @Filename     : bsp_can.c
- * @       IRobot  EC_lib
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
  */
 #include "bsp_can.h"
 
@@ -18,6 +19,8 @@ static Can_Device_t* can_devices[CAN_MX_REGISTER_CNT] = {NULL};
 static uint8_t id_cnt;  // 全局CAN实例索引,每次有新的模块注册会自增
 
 static void canOfflineCallback(Monitor_Device_t* monitor_device) {
+    if (monitor_device == NULL || monitor_device->device == NULL) return;
+
     Can_Device_t* can_device = monitor_device->device;
 
     can_device->state = STATE_OFFLINE;

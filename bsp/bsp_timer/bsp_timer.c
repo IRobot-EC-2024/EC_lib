@@ -1,15 +1,13 @@
-//=====================================================================================================
-// bsp_timer.c
-//=====================================================================================================
-//
-//       IRobot  EC_lib
-//
-// GitHub: https://github.com/Specific_Cola
-// question:  specificcola@proton.me
-// Date			Author			Notes
-//
-//
-//=====================================================================================================
+/**
+ * @Author       : Specific-Cola specificcola@proton.me
+ * @Date         : 2024-03-22 23:03:00
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 13:45:58
+ * @Description  :
+ * @Filename     : bsp_timer.c
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
+ */
 #include "bsp_timer.h"
 
 #include <stdlib.h>

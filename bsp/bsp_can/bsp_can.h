@@ -1,11 +1,12 @@
 /**
  * @Author       : Specific-Cola specificcola@proton.me
- * @Date         : 2024-04-01 00:23:00
- * @LastEditors  : H0pefu12 147677733+H0pefu12@users.noreply.github.com
- * @LastEditTime : 2024-04-03 13:21:22
+ * @Date         : 2024-04-07 00:48:03
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 13:41:30
  * @Description  :
  * @Filename     : bsp_can.h
- * @       IRobot  EC_lib
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
  */
 #ifndef BSP_CAN_H__
 #define BSP_CAN_H__
@@ -69,7 +70,7 @@ typedef struct {
     uint32_t tx_id;  // 发送id
     uint32_t rx_id;  // 接收id
     uint8_t tx_dlc;
-	uint16_t offline_threshold;//单位ms
+    uint16_t offline_threshold;                  // 单位ms
     void (*can_device_callback)(Can_Device_t*);  // 处理接收数据的回调函数
     void (*can_device_offline_callback)(Can_Device_t*);
 
