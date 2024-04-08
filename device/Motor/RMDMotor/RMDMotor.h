@@ -1,3 +1,11 @@
+/**
+ * @Author: H0pefu12 147677733+H0pefu12@users.noreply.github.com
+ * @Date: 2024-04-01 00:59:52
+ * @LastEditTime: 2024-04-01 15:32:11
+ * @LastEditors: H0pefu12 147677733+H0pefu12@users.noreply.github.com
+ * @Description: 
+ * @FilePath: /MDK-ARMd:/0_Important/RM_iRobot/02_Engineer/Engineer_Chassis/EC_lib/device/Motor/RMDMotor/RMDMotor.h
+ */
 //=====================================================================================================
 // djiMotor.h
 //=====================================================================================================
@@ -65,6 +73,6 @@ typedef struct {
 RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg);
 void rmdMotorDelete(RMD_Motor_t* motor);
 void rmdMotorInfoUpdate(RMD_Motor_t* motor, uint8_t* data);
-Return_t rmdMotorSendMessage();
+Return_t rmdMotorSendMessage(RMD_Motor_t* motor);
 
 #endif  // !DJIMOTOR_H__
