@@ -1,8 +1,8 @@
 /**
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-03-22 23:03:00
- * @LastEditors  : H0pefu12 147677733+H0pefu12@users.noreply.github.com
- * @LastEditTime : 2024-04-03 13:19:33
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 12:14:50
  * @Description  :
  * @Filename     : bsp_can.c
  * @       IRobot  EC_lib
@@ -72,12 +72,6 @@ void canFilterConfig(Can_Device_t* device) {
 Can_Device_t* canDeviceRegister(Can_Register_t* reg) {
     if (!id_cnt) {
         canOnInit();
-        HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_ACCEPT_IN_RX_FIFO0,
-                                     FDCAN_REJECT, DISABLE, DISABLE);
-        HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_ACCEPT_IN_RX_FIFO0,
-                                     FDCAN_REJECT, DISABLE, DISABLE);
-        HAL_FDCAN_ConfigGlobalFilter(&hfdcan3, FDCAN_ACCEPT_IN_RX_FIFO0,
-                                     FDCAN_REJECT, DISABLE, DISABLE);
     }
     if (id_cnt > CAN_MX_REGISTER_CNT) {
         Error_Handler();  // 后面希望定义一个全局变量来展示错误类型
@@ -124,15 +118,14 @@ Can_Device_t* canDeviceRegister(Can_Register_t* reg) {
     instance->tx_id = reg->tx_id;  // 好像没用,可以删掉
     instance->rx_id = reg->rx_id;
     instance->can_device_callback = reg->can_device_callback;
-	instance->parent = reg->parent;
-	
-	Monitor_Register_t monitor_reg;
-	
-	monitor_reg.device = instance;
-	monitor_reg.offlineCallback = canOfflineCallback;
-	monitor_reg.offline_threshold = reg->offline_threshold;
-	instance->monitor_handle = monitorInit(&monitor_reg);
-	
+    instance->parent = reg->parent;
+
+    Monitor_Register_t monitor_reg;
+
+    monitor_reg.device = instance;
+    monitor_reg.offlineCallback = canOfflineCallback;
+    monitor_reg.offline_threshold = reg->offline_threshold;
+    instance->monitor_handle = monitorInit(&monitor_reg);
 
     canFilterConfig(instance);         // 添加CAN过滤器规则
     can_devices[id_cnt++] = instance;  // 将实例保存到can_instance中
@@ -147,6 +140,12 @@ void canOnInit(void) {
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
     HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
 #elif defined(FDCAN_DEVICE)
+    HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_ACCEPT_IN_RX_FIFO0,
+                                 FDCAN_REJECT, DISABLE, DISABLE);
+    HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_ACCEPT_IN_RX_FIFO0,
+                                 FDCAN_REJECT, DISABLE, DISABLE);
+    HAL_FDCAN_ConfigGlobalFilter(&hfdcan3, FDCAN_ACCEPT_IN_RX_FIFO0,
+                                 FDCAN_REJECT, DISABLE, DISABLE);
     HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
     HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
     HAL_FDCAN_ActivateNotification(&hfdcan3, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);

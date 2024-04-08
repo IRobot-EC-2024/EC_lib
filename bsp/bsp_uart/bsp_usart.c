@@ -17,12 +17,17 @@
 
 #include "uart_dma_double.h"
 
+#if defined(STM32H723xx)
 #define DMA_GET_DBM(hdma)                                                    \
     ((hdma) != 0                                                             \
          ? (((DMA_Stream_TypeDef*)hdma->Instance)->CR & DMA_SxCR_CIRC) != 0  \
          : (((BDMA_Channel_TypeDef*)hdma->Instance)->CCR & BDMA_CCR_CIRC) != \
                0)
+#elif defined(STM32F427xx) || defined(STM32F407xx)
+#define DMA_GET_DBM(hdma) \
+    ((((DMA_Stream_TypeDef*)hdma->Instance)->CR & DMA_SxCR_CIRC) != 0)
 
+#endif
 static Usart_Device_t* usart_device[USART_MX_REGISTER_CNT] = {NULL};
 static uint8_t id_cnt = 0;  // 全局USART实例索引,每次有新的模块注册会自增
 
@@ -139,8 +144,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart,
     for (uint8_t i = 0; i < id_cnt;
          ++i) {  // find the instance which is being handled
         if (huart ==
-            usart_device[i]->usart_handle) {  // call the callback function if
-                                              // it is not NULL
+            usart_device[i]->usart_handle) {  // call the callback function
+                                              // if it is not NULL
             if (usart_device[i]->rx_buff_num == 2) {
                 usart_device[i]->rx_info.rx_buff_select =
                     DMA_GET_DBM(usart_device[i]->usart_handle->hdmarx);

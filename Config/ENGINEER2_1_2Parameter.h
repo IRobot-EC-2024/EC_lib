@@ -13,21 +13,22 @@
 #define BACK_ECD -75.0
 
 // 小资源岛升降高度
-#define LITTLE_ISLAND_OF_RESOURCES_0 Lift_motor_start_angle[0] - 230
-#define LITTLE_ISLAND_OF_RESOURCES_1 Lift_motor_start_angle[1] + 230
-// 大资源岛升降高度
-#define BIG_ISLAND_OF_RESOURCES_0 Lift_motor_start_angle[0] - 230
-#define BIG_ISLAND_OF_RESOURCES_1 Lift_motor_start_angle[1] + 230
-// 存矿高度
-#define SAVE_MINE_HEIGHT_0 Lift_motor_start_angle[0] - 260
-#define SAVE_MINE_HEIGHT_1 Lift_motor_start_angle[1] + 260
-// 抬矿
-#define LIFT_MINE_HEIGHT_0 Lift_motor_start_angle[0] - 340
-#define LIFT_MINE_HEIGHT_1 Lift_motor_start_angle[1] + 340
+#define LITTLE_ISLAND_OF_RESOURCES_HEIGHT 630
+
+// 小资源岛取矿高度
+#define LITTLE_ISLAND_FETCH_HEIGHT 470
 
 // 兑换站大致高度
-#define EXCHANGE_STATION_HEIGHT_0 Lift_motor_start_angle[0] - 280
-#define EXCHANGE_STATION_HEIGHT_1 Lift_motor_start_angle[0] + 280
+#define EXCHANGE_STATION_HEIGHT 280
+
+// 大资源岛升降高度
+#define BIG_ISLAND_OF_RESOURCES_HEIGHT 230
+
+// 存矿高度
+#define SAVE_MINE_HEIGHT 260
+
+// 抬矿
+#define LIFT_MINE_HEIGHT 340
 
 // 保持时的目标速度
 #define LEFT_MAINTAIN_SPEED -5
@@ -39,11 +40,11 @@
 // 兑换模式自动抬升
 #define EXCHANGE_UPWARD_SPEED_AUTO 50
 // 兑换模式手动向上抬升目标速度
-#define EXCHANGE_UPWARD_SPEED 45
-#define EXCHANGE_UPWARD_SPEED_SLOWLY 25
+#define EXCHANGE_UPWARD_SPEED 300
+#define EXCHANGE_UPWARD_SPEED_SLOWLY 100
 // 兑换模式手动向下下降目标速度
-#define EXCHANGE_DOWNWARD_SPEED -8
-#define EXCHANGE_DOWNWARD_SPEED_SLOWLY -3
+#define EXCHANGE_DOWNWARD_SPEED -300
+#define EXCHANGE_DOWNWARD_SPEED_SLOWLY -100
 
 // 资源岛模式向下抓矿下降目标速度
 #define ISLAND_DOWNWARD_SPEED -6
@@ -65,21 +66,6 @@
 // #define CHASSIS_SPEED_SLOW_PID_KP 15
 // #define CHASSIS_SPEED_SLOW_PID_KI 0
 // #define CHASSIS_SPEED_SLOW_PID_KD 0
-
-////保持抬升左速度环参数
-// #define LIFT_MOTOR_LEFT_CONUTINE_SPEED_PID_KP 25
-// #define LIFT_MOTOR_LEFT_CONUTINE_SPEED_PID_KI 0.01
-// #define LIFT_MOTOR_LEFT_CONUTINE_SPEED_PID_KD 0
-
-////保持抬升右速度环参
-// #define LIFT_MOTOR_RIGHT_CONUTINE_SPEED_PID_KP 25
-// #define LIFT_MOTOR_RIGHT_CONUTINE_SPEED_PID_KI 0.01
-// #define LIFT_MOTOR_RIGHT_CONUTINE_SPEED_PID_KD 0
-
-////空接抬升左速度环参数
-// #define LIFT_MOTOR_LEFT_SPEED_PID_KP 5.35
-// #define LIFT_MOTOR_LEFT_SPEED_PID_KI 0.01
-// #define LIFT_MOTOR_LEFT_SPEED_PID_KD 0
 
 // 视觉抬升速度环参数
 #define VIEW_LIFT_MOTOR_SPEED_PID_KP 4
