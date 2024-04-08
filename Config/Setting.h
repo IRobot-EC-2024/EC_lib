@@ -13,8 +13,8 @@
 #define M2006_MAX_OUTPUT 10000
 #define M2006_MAX_IOUTPUT 5000
 
-#define MUC1
-// #define MUC2
+// #define MUC1
+#define MUC2
 
 // #define HERO1
 // #define HERO1_0
@@ -76,7 +76,7 @@
 // imu安装方向
 #define IMU_DIRECTION_rxryz_XYZ
 // gyro yaw轴偏置
-#define GYRO_YAW_BIAS -0.019981f //-0.01065f
+#define GYRO_YAW_BIAS -0.019981f  //-0.01065f
 // 主发射机构类型
 #define MAIN_SHOOTER_TYPE_NORMAL
 // #define MAIN_SHOOTER_TYPE_HEAVY
@@ -96,9 +96,9 @@
 #define AMMO_LEFT_MOTOR_DIRECTION -1
 #define AMMO_RIGHT_MOTOR_DIRECTION 1
 // 云台YAW轴零点和俯仰限幅
-#define YAW_ZERO_ECDANGLE 180.0f - 142.5f // 21.4f
-#define PITCH_MIN_ANGLE -27.0f            //-24.0f//-26.0f
-#define PITCH_MAX_ANGLE 15.0f             // 15.0f
+#define YAW_ZERO_ECDANGLE 180.0f - 142.5f  // 21.4f
+#define PITCH_MIN_ANGLE -27.0f             //-24.0f//-26.0f
+#define PITCH_MAX_ANGLE 15.0f              // 15.0f
 // 默认摩擦轮速度
 #define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_30MS
 #define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_30MS
@@ -268,7 +268,7 @@
 // imu°2×°·??ò
 #define IMU_DIRECTION_zryx_XYZ
 // gyro yaw?á????
-#define GYRO_YAW_BIAS -0.0025f // 055f
+#define GYRO_YAW_BIAS -0.0025f  // 055f
 // ?÷·￠é??ú11ààDí
 #define MAIN_SHOOTER_TYPE_NORMAL
 // #define MAIN_SHOOTER_TYPE_HEAVY
@@ -288,9 +288,9 @@
 #define AMMO_LEFT_MOTOR_DIRECTION -1
 #define AMMO_RIGHT_MOTOR_DIRECTION 1
 // ??ì¨YAW?áá?μ?oí????T·ù
-#define YAW_ZERO_ECDANGLE 19.0f //-144.102539f
-#define PITCH_MIN_ANGLE -19.5f  //-31.0f
-#define PITCH_MAX_ANGLE 25.0f   // 15.0f//18.0f
+#define YAW_ZERO_ECDANGLE 19.0f  //-144.102539f
+#define PITCH_MIN_ANGLE -19.5f   //-31.0f
+#define PITCH_MAX_ANGLE 25.0f    // 15.0f//18.0f
 // ??è??|2á???ù?è
 #define DEFAULT_AMMOL_PID AMMO_LEFT_SPEED_15MS
 #define DEFAULT_AMMOR_PID AMMO_RIGHT_SPEED_15MS
