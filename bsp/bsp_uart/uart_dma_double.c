@@ -1,3 +1,13 @@
+/**
+ * @Author       : H0pefu12 573341043@qq.com
+ * @Date         : 2024-04-08 12:12:57
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 13:48:29
+ * @Description  : 
+ * @Filename     : uart_dma_double.c
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
+ */
 #include "uart_dma_double.h"
 
 #if defined(STM32H723xx)

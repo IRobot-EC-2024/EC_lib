@@ -1,10 +1,12 @@
 /**
- * @Author       : H0pefu12 147677733+H0pefu12@users.noreply.github.com
+ * @Author       : H0pefu12 573341043@qq.com
  * @Date         : 2024-04-02 19:10:02
- * @LastEditors  : H0pefu12 147677733+H0pefu12@users.noreply.github.com
- * @LastEditTime : 2024-04-02 20:13:00
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 13:47:14
  * @Description  :
  * @Filename     : bsp_monitor.c
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
  */
 #include "bsp_monitor.h"
 
@@ -41,9 +43,9 @@ Monitor_Device_t* monitorInit(Monitor_Register_t* monitor_reg) {
  * @return {*}
  */
 void monitorRefresh(Monitor_Device_t* monitor_device) {
-	if(monitor_device==NULL){
-		return ;
-	}
+    if (monitor_device == NULL) {
+        return;
+    }
     monitor_device->offline_counter = 0;
     monitor_device->offline_flag = MONITOR_DEVICE_ONLINE;
 }
@@ -54,10 +56,10 @@ void monitorRefresh(Monitor_Device_t* monitor_device) {
  * @return {*}
  */
 Monitor_Device_Status monitorCounter(Monitor_Device_t* monitor_device) {
-	if(monitor_device==NULL){
-		return MONITOR_DEVICE_OFFLINE;
-	}
-	
+    if (monitor_device == NULL) {
+        return MONITOR_DEVICE_OFFLINE;
+    }
+
     if (monitor_device->offline_flag == MONITOR_DEVICE_OFFLINE) {
         monitor_device->offlineCallback(monitor_device);
         return MONITOR_DEVICE_OFFLINE;

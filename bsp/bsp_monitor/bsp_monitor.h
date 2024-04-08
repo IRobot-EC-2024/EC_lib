@@ -1,10 +1,12 @@
 /**
- * @Author       : H0pefu12 147677733+H0pefu12@users.noreply.github.com
- * @Date         : 2024-04-02 19:10:14
- * @LastEditors  : H0pefu12 147677733+H0pefu12@users.noreply.github.com
- * @LastEditTime : 2024-04-02 19:54:59
- * @Description  : bsp外设的离线检测
+ * @Author       : H0pefu12 573341043@qq.com
+ * @Date         : 2024-04-07 00:48:03
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 13:48:10
+ * @Description  :
  * @Filename     : bsp_monitor.h
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
  */
 #ifndef BSP_MONITOR_H__
 #define BSP_MONITOR_H__

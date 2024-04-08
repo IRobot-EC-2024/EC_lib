@@ -1,15 +1,13 @@
-//=====================================================================================================
-// bsp_uart.c
-//=====================================================================================================
-//
-//       IRobot  EC_lib
-//
-// GitHub: https://github.com/Specific_Cola
-// question:  specificcola@proton.me
-// Date			Author			Notes
-//
-//
-//=====================================================================================================
+/**
+ * @Author       : Specific-Cola specificcola@proton.me
+ * @Date         : 2024-04-08 12:12:57
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 13:44:32
+ * @Description  :
+ * @Filename     : bsp_usart.c
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
+ */
 #include "bsp_usart.h"
 
 #include <stdlib.h>
@@ -28,6 +26,7 @@
     ((((DMA_Stream_TypeDef*)hdma->Instance)->CR & DMA_SxCR_CIRC) != 0)
 
 #endif
+
 static Usart_Device_t* usart_device[USART_MX_REGISTER_CNT] = {NULL};
 static uint8_t id_cnt = 0;  // 全局USART实例索引,每次有新的模块注册会自增
 
@@ -70,6 +69,15 @@ static void usartStartReceive(Usart_Device_t* instance) {
     }
 }
 
+static void usartOfflineCallback(Monitor_Device_t* monitor) {
+    if (monitor == NULL || monitor->device == NULL) return;
+    Usart_Device_t* instance = (Usart_Device_t*)monitor->device;
+    instance->state = STATE_OFFLINE;
+    if (instance->usart_device_offline_callback != NULL) {
+        instance->usart_device_offline_callback(instance);
+    }
+}
+
 Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     if (id_cnt > USART_MX_REGISTER_CNT) {
         Error_Handler();  // 后面希望定义一个全局变量来展示错误类型
@@ -95,6 +103,14 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     instance->rx_buff_num = reg->rx_buff_num;
     instance->usart_device_callback = reg->usart_device_callback;
 
+    Monitor_Register_t monitor_reg;
+
+    monitor_reg.device = instance;
+    monitor_reg.offlineCallback = usartOfflineCallback;
+    monitor_reg.offline_threshold = reg->offline_threshold;
+    instance->monitor_handle = monitorInit(&monitor_reg);
+
+    instance->state = STATE_ONLINE;
     usart_device[id_cnt++] = instance;  // 完成自增
 
     usartStartReceive(instance);  // 注册完成后直接开启接收
@@ -141,11 +157,11 @@ Return_t usartSendMessage(Usart_Device_t* instance, uint8_t* message,
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart,
                                 uint16_t size)  // todo  双缓存区如何接收
 {
-    for (uint8_t i = 0; i < id_cnt;
-         ++i) {  // find the instance which is being handled
-        if (huart ==
-            usart_device[i]->usart_handle) {  // call the callback function
-                                              // if it is not NULL
+    // find the instance which is being handled
+    for (uint8_t i = 0; i < id_cnt; ++i) {
+        // call the callback function
+        if (huart == usart_device[i]->usart_handle) {
+            // if it is not NULL
             if (usart_device[i]->rx_buff_num == 2) {
                 usart_device[i]->rx_info.rx_buff_select =
                     DMA_GET_DBM(usart_device[i]->usart_handle->hdmarx);
@@ -162,9 +178,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart,
                 if (usart_device[i]->usart_device_callback != NULL) {
                     usart_device[i]->rx_info.this_time_rx_len = size;
                     usart_device[i]->usart_device_callback(usart_device[i]);
-                    memset(usart_device[i]->rx_buff, 0,
-                           size);  // 接收结束后清空buffer,对于变长数据是必要的
-                                   // 如果需要清除，就在回调函数里清除
+                    // 接收结束后清空buffer,对于变长数据是必要的
+                    memset(usart_device[i]->rx_buff, 0, size);
+                    // 如果需要清除，就在回调函数里清除
                 }
                 usartDMARestart(usart_device[i]);
             }
