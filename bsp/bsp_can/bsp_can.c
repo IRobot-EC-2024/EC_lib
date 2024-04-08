@@ -1,15 +1,11 @@
-//=====================================================================================================
-// bsp_can.c
-//=====================================================================================================
-//
-//       IRobot  EC_lib
-//
-// GitHub: https://github.com/Specific_Cola
-// question:  specificcola@proton.me
-// Date			Author			Notes
-//
-//
-//=====================================================================================================
+/**
+ * @Author       : Specific-Cola 1528284020@qq.com
+ * @Date         : 2024-04-01 00:59:52
+ * @LastEditors  : H0pefu12 147677733+H0pefu12@users.noreply.github.com
+ * @LastEditTime : 2024-04-01 20:33:28
+ * @Description  :
+ * @Filename     : bsp_can.c
+ */
 #include "bsp_can.h"
 
 #include <stdlib.h>
@@ -67,12 +63,6 @@ void canFilterConfig(
 Can_Device_t* canDeviceRegister(Can_Register_t* reg) {
     if (!id_cnt) {
         canOnInit();
-        HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_ACCEPT_IN_RX_FIFO0,
-                                     FDCAN_REJECT, DISABLE, DISABLE);
-        HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_ACCEPT_IN_RX_FIFO0,
-                                     FDCAN_REJECT, DISABLE, DISABLE);
-        HAL_FDCAN_ConfigGlobalFilter(&hfdcan3, FDCAN_ACCEPT_IN_RX_FIFO0,
-                                     FDCAN_REJECT, DISABLE, DISABLE);
     }
     if (id_cnt > CAN_MX_REGISTER_CNT) {
         Error_Handler();  // 后面希望定义一个全局变量来展示错误类型
@@ -119,7 +109,6 @@ Can_Device_t* canDeviceRegister(Can_Register_t* reg) {
     instance->tx_id = reg->tx_id;  // 好像没用,可以删掉
     instance->rx_id = reg->rx_id;
     instance->can_device_callback = reg->can_device_callback;
-    instance->id = reg->id;
 
     canFilterConfig(instance);        // 添加CAN过滤器规则
     can_device[id_cnt++] = instance;  // 将实例保存到can_instance中
@@ -134,6 +123,12 @@ void canOnInit(void) {
     HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
     HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
 #elif defined(FDCAN_DEVICE)
+    HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_ACCEPT_IN_RX_FIFO0,
+                                 FDCAN_REJECT, DISABLE, DISABLE);
+    HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_ACCEPT_IN_RX_FIFO0,
+                                 FDCAN_REJECT, DISABLE, DISABLE);
+    HAL_FDCAN_ConfigGlobalFilter(&hfdcan3, FDCAN_ACCEPT_IN_RX_FIFO0,
+                                 FDCAN_REJECT, DISABLE, DISABLE);
     HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
     HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
     HAL_FDCAN_ActivateNotification(&hfdcan3, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);

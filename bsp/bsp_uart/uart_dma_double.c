@@ -1,5 +1,6 @@
 #include "uart_dma_double.h"
 
+#if defined(STM32H723xx)
 /**
  * @brief  End ongoing Rx transfer on UART peripheral (following error detection or Reception completion).
  * @param  huart UART handle.
@@ -292,3 +293,9 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA_double(UART_HandleTypeDef *huart,
         return HAL_BUSY;
     }
 }
+#elif defined(STM32F427xx) || defined(STM32F407xx)
+HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA_double(UART_HandleTypeDef *huart, uint8_t *pData, uint8_t *pData1, uint16_t Size)
+{
+	return HAL_ERROR;
+}
+#endif
