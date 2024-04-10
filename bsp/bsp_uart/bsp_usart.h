@@ -2,7 +2,7 @@
  * @Author       : Specific_Cola specificcola@proton.me
  * @Date         : 2024-03-22 23:57:28
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 13:44:52
+ * @LastEditTime : 2024-04-11 00:25:02
  * @Description  :
  * @Filename     : bsp_usart.h
  * @
@@ -33,10 +33,9 @@ typedef struct {
 typedef struct Usart_Device_ {
     uint8_t state;
     UART_HandleTypeDef* usart_handle;  // uart句柄
-    union {
-        uint8_t rx_buff[USART_RXBUFF_LIMIT];          // 单缓冲区使用
-        uint8_t rx_buff2[2][USART_RXBUFF_LIMIT / 2];  // 双缓存区使用
-    };
+
+    uint8_t* rx_buff;     // 单缓冲区使用
+    uint8_t* rx_buff2;    // 双缓存区使用
     uint16_t rx_len;      // 接收一包数据的大小
     uint8_t rx_buff_num;  // 缓存区数目
     Usart_Receive_Info_t rx_info;
