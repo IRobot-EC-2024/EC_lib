@@ -2,7 +2,7 @@
  * @Author       : Specific_Cola specificcola@proton.me
  * @Date         : 2024-04-07 00:48:03
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 13:24:12
+ * @LastEditTime : 2024-04-09 01:03:49
  * @Description  :
  * @Filename     : referee.h
  * @
@@ -11,6 +11,8 @@
 #define REFEREE_RECEIVER_H__
 
 #include "bsp_usart.h"
+#include "crc16.h"
+#include "crc8.h"
 #include "fifo.h"
 #include "referee_info.h"
 
@@ -56,16 +58,25 @@ typedef struct {
     uint32_t offline_counter[4][16];
     Usart_Device_t* usart_info;
     Usart_Device_t* vision_info;
-    fifo_s_t referee_fifo;
+
+    // 裁判系统接收
     frame_header_struct_t referee_header;
     Referee_info_t referee_info;
+    unpack_data_t referee_unpack_obj;
+    fifo_s_t referee_receive_fifo;
+
+    // 裁判系统发送
+    fifo_t referee_ui_fifo;
 } Referee_t;
 
 Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1,
-                                       UART_HandleTypeDef* huart2);
+                              UART_HandleTypeDef* huart2);
 void referee_data_solve(uint8_t* frame);
 Referee_t* refereeReceiverGet(void);
 
 void referee_status_updata(void);
+
+void referee();
+void refereeDrawUI();
 
 #endif  // !REFEREE_RECEIVER_H__

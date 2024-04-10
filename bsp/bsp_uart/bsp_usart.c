@@ -2,7 +2,7 @@
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 14:53:22
+ * @LastEditTime : 2024-04-08 21:09:40
  * @Description  :
  * @Filename     : bsp_usart.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -101,6 +101,8 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     instance->rx_len = reg->rx_len;
     instance->rx_buff_num = reg->rx_buff_num;
     instance->usart_device_callback = reg->usart_device_callback;
+	instance->usart_device_offline_callback = reg->usart_device_offline_callback;
+	instance->parent = reg->parent;
 
     Monitor_Register_t monitor_reg;
 
@@ -153,9 +155,8 @@ Return_t usartSendMessage(Usart_Device_t* instance, uint8_t* message,
     return ret;
 }
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart,
-                                uint16_t size)  // todo  双缓存区如何接收
-{
+// todo  双缓存区如何接收
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t size) {
     // find the instance which is being handled
     for (uint8_t i = 0; i < id_cnt; ++i) {
         // call the callback function
@@ -183,6 +184,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart,
                 }
                 usartDMARestart(usart_device[i]);
             }
+
+            monitorRefresh(usart_device[i]->monitor_handle);
+            usart_device[i]->state = STATE_ONLINE;
             return;  // break the loop
         }
     }

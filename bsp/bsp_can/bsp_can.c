@@ -2,7 +2,7 @@
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-03-22 23:03:00
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 13:41:08
+ * @LastEditTime : 2024-04-08 22:02:09
  * @Description  :
  * @Filename     : bsp_can.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -116,15 +116,17 @@ Can_Device_t* canDeviceRegister(Can_Register_t* reg) {
     instance->tx_config.MessageMarker =
         0x00;  // 用于复制到TX EVENT FIFO的消息Maker来识别消息状态，范围0到0xFF
 #endif
-        // 设置回调函数和接收发送id
+
+    // 设置回调函数和接收发送id
     instance->can_handle = reg->can_handle;
     instance->tx_id = reg->tx_id;  // 好像没用,可以删掉
     instance->rx_id = reg->rx_id;
     instance->can_device_callback = reg->can_device_callback;
+    instance->can_device_offline_callback = reg->can_device_offline_callback;
+
     instance->parent = reg->parent;
 
     Monitor_Register_t monitor_reg;
-
     monitor_reg.device = instance;
     monitor_reg.offlineCallback = canOfflineCallback;
     monitor_reg.offline_threshold = reg->offline_threshold;
@@ -200,9 +202,11 @@ static void canReceiveMessage(CAN_HandleTypeDef* hcan) {
 
     // FIFO不为空,有可能在其他中断时有多帧数据进入
     while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0)) {
-        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_config,
-                             can_rx_buff);  // 从FIFO中获取数据
-        for (uint8_t i = 0; i < id_cnt; i++) {  // 两者相等说明这是要找的实例
+        // 从FIFO中获取数据
+        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_config, can_rx_buff);
+
+        // 两者相等说明这是要找的实例
+        for (uint8_t i = 0; i < id_cnt; i++) {
             if (hcan == can_devices[i]->can_handle &&
                 rx_config.StdId == can_devices[i]->rx_id) {
                 can_devices[i]->state = STATE_ONLINE;
@@ -218,7 +222,10 @@ static void canReceiveMessage(CAN_HandleTypeDef* hcan) {
                     // 触发回调进行数据解析和处理
                     can_devices[i]->can_device_callback(can_devices[i]);
                 }
-                return;
+
+                monitorRefresh(can_devices[i]->monitor_handle);
+                can_devices[i]->state = STATE_ONLINE;
+                break;
             }
         }
     }
@@ -253,7 +260,10 @@ static void canReceiveMessage(FDCAN_HandleTypeDef* hfdcan) {
                     // 触发回调进行数据解析和处理
                     can_devices[i]->can_device_callback(can_devices[i]);
                 }
-                return;
+
+                monitorRefresh(can_devices[i]->monitor_handle);
+                can_devices[i]->state = STATE_ONLINE;
+                break;
             }
         }
     }

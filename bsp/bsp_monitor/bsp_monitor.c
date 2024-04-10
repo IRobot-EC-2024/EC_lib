@@ -2,7 +2,7 @@
  * @Author       : H0pefu12 573341043@qq.com
  * @Date         : 2024-04-02 19:10:02
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 13:47:14
+ * @LastEditTime : 2024-04-08 15:37:01
  * @Description  :
  * @Filename     : bsp_monitor.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -73,4 +73,11 @@ Monitor_Device_Status monitorCounter(Monitor_Device_t* monitor_device) {
     }
 
     return MONITOR_DEVICE_ONLINE;
+}
+
+void monitorCounterAll(void) {
+    uint8_t i;
+    for (i = 0; i < id_cnt; i++) {
+        monitorCounter(monitor_devices[i]);
+    }
 }
