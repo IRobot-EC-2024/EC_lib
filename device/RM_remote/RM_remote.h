@@ -85,7 +85,7 @@ void rmRemoteDelete(RM_Remote_t* remote);
 uint8_t rmRemoteIsError();
 void solveRCLost(void);
 void solveDataError(void);
-void sbus_to_rc(uint8_t dambufnum);
+void sbus_to_rc(uint8_t* rx_data);
 
 extern bool_t CheckKeyPressPart(uint16_t Key);  // 长按触发,部分匹配
 extern bool_t CheckKeyPress(uint16_t Key);      // 长按触发,完全匹配
