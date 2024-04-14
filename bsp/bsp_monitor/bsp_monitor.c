@@ -61,14 +61,19 @@ Monitor_Device_Status monitorCounter(Monitor_Device_t* monitor_device) {
     }
 
     if (monitor_device->offline_flag == MONITOR_DEVICE_OFFLINE) {
-        monitor_device->offlineCallback(monitor_device);
+		if(monitor_device->offlineCallback!=NULL) {
+			monitor_device->offlineCallback(monitor_device);
+		}
         return MONITOR_DEVICE_OFFLINE;
     }
 
     monitor_device->offline_counter++;
     if (monitor_device->offline_counter >= monitor_device->offline_threshold) {
         monitor_device->offline_flag = MONITOR_DEVICE_OFFLINE;
-        monitor_device->offlineCallback(monitor_device);
+		if(monitor_device->offlineCallback!=NULL) {
+			monitor_device->offlineCallback(monitor_device);
+		}
+		
         return MONITOR_DEVICE_OFFLINE;
     }
 

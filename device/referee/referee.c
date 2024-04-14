@@ -2,30 +2,39 @@
  * @Author       : Specific_Cola specificcola@proton.me
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-11 01:36:11
+ * @LastEditTime : 2024-04-13 04:47:33
  * @Description  :
  * @Filename     : referee.c
  * @
  */
 #include "referee.h"
 
-#define REFEREE_FIFO_BUF_LENGTH 1024
-#define REFEREE_UI_FIFO_ELEMENTS 32
-#define REFEREE_UI_ELEMENT_SIZE 15
+#include "Client_UI.h"
+
+#define REFEREE_FIFO_BUF_LENGTH 512
+#define REFEREE_SEND_FIFO_BUF_LENGTH 512
+#define REFEREE_FIGURE_FIFO_ELEMENT_NUM 16
+#define REFEREE_FIGURE_FIFO_ELEMENT_SIZE 15
+
+#define Robot_ID UI_Data_RobotID_BEngineer
+#define Cilent_ID UI_Data_CilentID_BEngineer  // 机器人角色设置
 
 static Referee_t* referee_instance;
 
 uint8_t referee_receive_fifo_buf[REFEREE_FIFO_BUF_LENGTH];
-uint8_t referee_ui_fifo_buf[REFEREE_UI_FIFO_ELEMENTS * REFEREE_UI_ELEMENT_SIZE];
+
+// 裁判系统通信发送fifo
+uint8_t referee_send_fifo_buf[REFEREE_SEND_FIFO_BUF_LENGTH];
+uint8_t referee_figure_fifo_buf[REFEREE_FIGURE_FIFO_ELEMENT_NUM * REFEREE_FIGURE_FIFO_ELEMENT_SIZE];
 
 // 裁判系统通信接收
 static void refereeReceiverCallback(Usart_Device_t* usart) {
     if (usart == NULL || usart->parent == NULL) return;
 
-    if (usart->rx_info.rx_buff_select) {
-        fifo_s_puts(&referee_instance->referee_fifo, (char*)usart->rx_buff, usart->rx_info.this_time_rx_len);
+    if (!usart->rx_info.rx_buff_select) {
+        fifo_s_puts(&referee_instance->referee_receive_fifo, (char*)usart->rx_buff, usart->rx_info.this_time_rx_len);
     } else {
-        fifo_s_puts(&referee_instance->referee_fifo, (char*)usart->rx_buff2, usart->rx_info.this_time_rx_len);
+        fifo_s_puts(&referee_instance->referee_receive_fifo, (char*)usart->rx_buff2, usart->rx_info.this_time_rx_len);
     }
 }
 
@@ -38,19 +47,27 @@ static void refereeOfflineCallback(Usart_Device_t* usart) {
 }
 
 Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* huart2) {
+    if (huart1 == NULL && huart2 == NULL) return NULL;
+
     Referee_t* referee = (Referee_t*)malloc(sizeof(Referee_t));
     memset(referee, 0, sizeof(Referee_t));
 
     Usart_Register_t usart_reg;
-    memset(&usart_reg, 0, sizeof(Usart_Register_t));
-    usart_reg.usart_handle = huart1;
-    usart_reg.rx_buff_num = 1;
-    usart_reg.rx_len = 256;
-    usart_reg.usart_device_callback = refereeReceiverCallback;
-    usart_reg.usart_device_offline_callback = refereeOfflineCallback;
-    usart_reg.parent = referee;
-    usart_reg.offline_threshold = 100;
-    referee->usart_info = usartDeviceRegister(&usart_reg);
+
+    if (huart1 != NULL) {
+        memset(&usart_reg, 0, sizeof(Usart_Register_t));
+        usart_reg.usart_handle = huart1;
+        usart_reg.rx_buff_num = 1;
+        usart_reg.rx_len = 256;
+        usart_reg.usart_device_callback = refereeReceiverCallback;
+        usart_reg.usart_device_offline_callback = refereeOfflineCallback;
+        usart_reg.parent = referee;
+        usart_reg.offline_threshold = 100;
+        referee->usart_info = usartDeviceRegister(&usart_reg);
+        fifo_s_init(&referee->referee_send_fifo, referee_send_fifo_buf, REFEREE_SEND_FIFO_BUF_LENGTH);
+        fifo_init(&referee->referee_figure_fifo, referee_figure_fifo_buf, REFEREE_FIGURE_FIFO_ELEMENT_SIZE,
+                  REFEREE_FIGURE_FIFO_ELEMENT_NUM);
+    }
 
     if (huart2 != NULL) {
         memset(&usart_reg, 0, sizeof(Usart_Register_t));
@@ -64,18 +81,11 @@ Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* hu
         referee->vision_info = usartDeviceRegister(&usart_reg);
     }
 
-    fifo_s_init(&referee->referee_fifo, referee_fifo_buf, REFEREE_FIFO_BUF_LENGTH);
-
-    uint8_t ui_size = sizeof(interaction_figure_t);
-    fifo_init(&referee->referee_ui_fifo, referee_ui_fifo_buf, REFEREE_UI_ELEMENT_SIZE, REFEREE_UI_FIFO_ELEMENTS);
+    fifo_s_init(&referee->referee_receive_fifo, referee_receive_fifo_buf, REFEREE_FIFO_BUF_LENGTH);
 
     referee->state = STATE_ONLINE;
     referee_instance = referee;
     return referee;
-}
-
-void refereeDrawUI(interaction_figure_t* interaction_figure) {
-    fifo_put(&referee_instance->referee_ui_fifo, interaction_figure);
 }
 
 Referee_t* refereeReceiverGet() { return referee_instance; }
@@ -92,8 +102,7 @@ void referee_data_solve(uint8_t* frame) {
     memcpy(&cmd_id, frame + index, sizeof(uint16_t));
     index += sizeof(uint16_t);
 
-    referee_instance->status[cmd_id >> 8][cmd_id & 0x0f] = 1;
-    referee_instance->offline_counter[cmd_id >> 8][cmd_id & 0x0f] = 0;
+    referee_instance->receive_time_stemp[cmd_id >> 8][cmd_id & 0x0f] = HAL_GetTick();
 
     switch (cmd_id) {
         case GAME_STATE_CMD_ID: {
@@ -270,18 +279,88 @@ void referee_unpack_fifo_data(void) {
 }
 
 // 裁判系统通信发送
+void refereeInteractionPush(robot_interaction_data_t* interaction_data, uint8_t user_data_length) {
+    if (interaction_data == NULL || user_data_length > ROBOT_INTERACTION_DATA_LENGTH) return;
 
-void referee_status_updata(void) {
-    uint8_t i = 0, j = 0;
+    uint8_t i = 0;
 
-    for (i = 0; i < 4; i++) {
-        for (j = 0; j < 16; j++) {
-            if (referee_instance->status[i][j]) {
-                referee_instance->offline_counter[i][j]++;
-                if (referee_instance->offline_counter[i][j] > 1000) {
-                    referee_instance->status[i][j] = 0;
-                }
+    fifo_s_put(&referee_instance->referee_send_fifo, user_data_length);
+    fifo_s_puts(&referee_instance->referee_send_fifo, (char*)interaction_data, user_data_length);
+}
+
+/**
+ * @description: 裁判系统通信发送，需要10Hz定频调用
+ * @return {*}
+ */
+void refereeInteractionSend() {
+    if (!referee_instance->referee_send_fifo.used_num) return;
+    static robot_interaction_data_t interaction_data;
+    static frame_header_struct_t framehead;
+    static uint8_t tx_data[128];
+
+    uint8_t i = 0, ptr = 0;
+    uint8_t data_length = 0;
+    uint16_t cmd_id = 0, ui_crc_16 = 0;
+
+    data_length = fifo_s_get(&referee_instance->referee_send_fifo);
+    fifo_s_gets(&referee_instance->referee_send_fifo, (char*)&interaction_data, data_length);
+
+    framehead.SOF = UI_SOF;
+    framehead.data_length = data_length;
+    framehead.seq = referee_instance->seq++;
+    framehead.CRC8 = Get_CRC8_Check_Sum_UI((uint8_t*)&framehead, 4, 0xFF);
+
+    memset(tx_data, 0, sizeof(tx_data));
+    memcpy(tx_data + ptr, &framehead, sizeof(frame_header_struct_t));
+    ptr += sizeof(frame_header_struct_t);
+
+    cmd_id = 0x0301;
+    memcpy(tx_data + ptr, &cmd_id, sizeof(uint16_t));
+    ptr += sizeof(uint16_t);
+
+    memcpy(tx_data + ptr, &interaction_data, data_length);
+    ptr += data_length;
+
+    ui_crc_16 = Get_CRC16_Check_Sum_UI(tx_data, ptr, 0xFFFF);
+    memcpy(tx_data + ptr, &ui_crc_16, sizeof(uint16_t));
+    ptr += sizeof(uint16_t);
+
+    usartSendMessage(referee_instance->usart_info, tx_data, ptr, USART_TRANSFER_DMA);
+}
+
+uint32_t refereeInteractionRemain() { return referee_instance->referee_send_fifo.used_num; }
+
+void refereeFigurePush(interaction_figure_t* interaction_figure) {
+    fifo_put(&referee_instance->referee_figure_fifo, interaction_figure);
+}
+
+void refereeFigure2Interaction() {
+    // 图像数目种类
+    static uint8_t figure_bag_type[4] = {7, 5, 2, 1};
+
+    // 循环变量
+    uint8_t i = 0, type = 0;
+
+    robot_interaction_data_t interaction_data;
+    interaction_figure_t interaction_figure[7];
+
+    uint8_t figure_num = referee_instance->referee_figure_fifo.used_num;
+    uint8_t figure_bag = figure_bag_type[0];
+
+    for (type = 0; type < 4; type++) {
+        figure_bag = figure_bag_type[type];
+
+        interaction_data.data_cmd_id = 0x0104 - type;
+
+        interaction_data.receiver_id = Cilent_ID;
+        interaction_data.sender_id = Robot_ID;
+
+        for (; figure_num >= figure_bag; figure_num -= figure_bag) {
+            for (i = 0; i < figure_bag; i++) {
+                fifo_get(&referee_instance->referee_figure_fifo, &interaction_figure[i]);
             }
+            memcpy(interaction_data.user_data, interaction_figure, sizeof(interaction_figure_t) * figure_bag);
+            refereeInteractionPush(&interaction_data, sizeof(interaction_figure_t) * figure_bag + 6);
         }
     }
 }

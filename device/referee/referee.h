@@ -2,7 +2,7 @@
  * @Author       : Specific_Cola specificcola@proton.me
  * @Date         : 2024-04-07 00:48:03
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-09 01:03:49
+ * @LastEditTime : 2024-04-13 04:48:20
  * @Description  :
  * @Filename     : referee.h
  * @
@@ -10,6 +10,7 @@
 #ifndef REFEREE_RECEIVER_H__
 #define REFEREE_RECEIVER_H__
 
+#include "Client_UI.h"
 #include "bsp_usart.h"
 #include "crc16.h"
 #include "crc8.h"
@@ -54,8 +55,6 @@ typedef struct {
 
 typedef struct {
     uint8_t state;
-    uint8_t status[4][16];
-    uint32_t offline_counter[4][16];
     Usart_Device_t* usart_info;
     Usart_Device_t* vision_info;
 
@@ -64,19 +63,22 @@ typedef struct {
     Referee_info_t referee_info;
     unpack_data_t referee_unpack_obj;
     fifo_s_t referee_receive_fifo;
+    uint32_t receive_time_stemp[4][16];
 
     // 裁判系统发送
-    fifo_t referee_ui_fifo;
+    uint8_t seq;
+    fifo_t referee_figure_fifo;  // 图像队列
+    fifo_s_t referee_send_fifo;  // 所有信息汇总
 } Referee_t;
 
-Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1,
-                              UART_HandleTypeDef* huart2);
+Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* huart2);
 void referee_data_solve(uint8_t* frame);
 Referee_t* refereeReceiverGet(void);
 
-void referee_status_updata(void);
-
-void referee();
-void refereeDrawUI();
+void refereeInteractionPush(robot_interaction_data_t* interaction_data, uint8_t user_data_length);
+void refereeInteractionSend(void);
+uint32_t refereeInteractionRemain(void);
+void refereeFigurePush(interaction_figure_t* interaction_figure);
+void refereeFigure2Interaction(void);
 
 #endif  // !REFEREE_RECEIVER_H__

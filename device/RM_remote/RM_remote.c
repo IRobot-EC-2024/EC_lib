@@ -2,7 +2,7 @@
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-04-08 11:31:11
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-11 01:38:14
+ * @LastEditTime : 2024-04-12 11:32:40
  * @Description  :
  * @Filename     : RM_remote.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -29,7 +29,6 @@ static int16_t RC_abs(int16_t value) {
         return -value;
     }
 }
-
 
 void rmRemoteCallback(Usart_Device_t* usart) {
     if (usart->rx_info.this_time_rx_len == RC_FRAME_LENGTH) {
@@ -64,16 +63,6 @@ RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg) {
 
     remote_instance = remote;
     return remote;
-}
-
-
-// 取正函数
-static int16_t RC_abs(int16_t value) {
-    if (value > 0) {
-        return value;
-    } else {
-        return -value;
-    }
 }
 
 uint8_t rmRemoteIsError() {

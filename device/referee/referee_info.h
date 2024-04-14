@@ -13,8 +13,7 @@
 #define REF_PROTOCOL_CMD_SIZE 2
 #define REF_PROTOCOL_CRC16_SIZE 2
 #define REF_HEADER_CRC_LEN (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE)
-#define REF_HEADER_CRC_CMDID_LEN \
-    (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE + sizeof(uint16_t))
+#define REF_HEADER_CRC_CMDID_LEN (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE + sizeof(uint16_t))
 #define REF_HEADER_CMDID_LEN (REF_PROTOCOL_HEADER_SIZE + sizeof(uint16_t))
 
 #define ROBOT_INTERACTION_DATA_LENGTH 113u
@@ -398,10 +397,10 @@ typedef enum {
     REFEREE_WARNING_CMD_ID = 0x0104,           // 裁判警告数据
     DART_INFO_CMD_ID = 0x0105,                 // 飞镖发射相关数据
 
-    ROBOT_STATE_CMD_ID = 0x0201,      // 机器人性能体系数据
-    POWER_HEAT_DATA_CMD_ID = 0x0202,  // 实时底盘功率和枪口热量数据
-    ROBOT_POS_CMD_ID = 0x0203,        // 机器人位置数据
-    BUFF_CMD_ID = 0x0204,             // 机器人增益数据
+    ROBOT_STATE_CMD_ID = 0x0201,            // 机器人性能体系数据
+    POWER_HEAT_DATA_CMD_ID = 0x0202,        // 实时底盘功率和枪口热量数据
+    ROBOT_POS_CMD_ID = 0x0203,              // 机器人位置数据
+    BUFF_CMD_ID = 0x0204,                   // 机器人增益数据
     AIR_SUPPORT_DATA_CMD_ID = 0x0205,       // 空中支援时间数据
     HURT_DATA_CMD_ID = 0x0206,              // 伤害状态数据
     SHOOT_DATA_CMD_ID = 0x0207,             // 实时射击数据
@@ -414,13 +413,13 @@ typedef enum {
     RADAR_INFO_CMD_ID = 0x020E,             // 雷达自主决策信息同步
 
     ROBOT_INTERACTION_DATA_CMD_ID = 0x0301,  // 机器人交互数据
-    CUSTOM_ROBOT_DATA_CMD_ID = 0x0302,  // 自定义控制器与机器人交互数据
-    MAP_COMMAND_CMD_ID = 0x0303,        // 选手端小地图交互数据
-    REMOTE_CONTROL_CMD_ID = 0x0304,  // 键鼠遥控数据
-    MAP_ROBOT_DATA_CMD_ID = 0x0305,  // 选手端小地图接收雷达数据
-    CUSTOM_CLIENT_DATA_CMD_ID = 0x0306,  // 自定义控制器与选手端交互数据
-    MAP_DATA_CMD_ID = 0X0307,            // 选手端小地图接收哨兵数据
-    CUSTOM_INFO_CMD_ID = 0X0308,  // 选手端小地图接收机器人数据
+    CUSTOM_ROBOT_DATA_CMD_ID = 0x0302,       // 自定义控制器与机器人交互数据
+    MAP_COMMAND_CMD_ID = 0x0303,             // 选手端小地图交互数据
+    REMOTE_CONTROL_CMD_ID = 0x0304,          // 键鼠遥控数据
+    MAP_ROBOT_DATA_CMD_ID = 0x0305,          // 选手端小地图接收雷达数据
+    CUSTOM_CLIENT_DATA_CMD_ID = 0x0306,      // 自定义控制器与选手端交互数据
+    MAP_DATA_CMD_ID = 0X0307,                // 选手端小地图接收哨兵数据
+    CUSTOM_INFO_CMD_ID = 0X0308,             // 选手端小地图接收机器人数据
 
 } referee_cmd_id_t;
 

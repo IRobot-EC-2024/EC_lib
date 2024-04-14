@@ -2,7 +2,7 @@
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-11 01:35:24
+ * @LastEditTime : 2024-04-13 01:48:51
  * @Description  :
  * @Filename     : bsp_usart.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -102,8 +102,8 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     }
 
     instance->usart_device_callback = reg->usart_device_callback;
-	instance->usart_device_offline_callback = reg->usart_device_offline_callback;
-	instance->parent = reg->parent;
+    instance->usart_device_offline_callback = reg->usart_device_offline_callback;
+    instance->parent = reg->parent;
 
     Monitor_Register_t monitor_reg;
 
@@ -166,9 +166,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t size) {
                 if (usart_device[i]->usart_device_callback != NULL) {
                     usart_device[i]->rx_info.this_time_rx_len = size;
                     usart_device[i]->usart_device_callback(usart_device[i]);
-                    memset(usart_device[i]->rx_buff, 0,
-                           size);  // 接收结束后清空buffer,对于变长数据是必要的
-                                   // 如果需要清除，就在回调函数里清除
+                    // 接收结束后清空buffer,对于变长数据是必要的
+                    memset(usart_device[i]->rx_buff, 0, size);
+                    // 如果需要清除，就在回调函数里清除
                 }
             } else {
                 if (usart_device[i]->usart_device_callback != NULL) {
