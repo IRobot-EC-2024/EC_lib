@@ -1,14 +1,13 @@
-//=====================================================================================================
-// RM_remote.h
-//=====================================================================================================
-//
-//       IRobot  EC_lib
-//
-// author: @ dji
-// modify: @ Specific_Cola
-//
-//
-//=====================================================================================================
+/**
+ * @Author       : Specific-Cola specificcola@proton.me
+ * @Date         : 2024-04-08 11:31:11
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-08 23:41:48
+ * @Description  :
+ * @Filename     : RM_remote.h
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
+ */
 #ifndef RM_REMOTE_H__
 #define RM_REMOTE_H__
 
@@ -69,7 +68,7 @@ typedef __PACKED_STRUCT {
 RC_ctrl_t;
 
 typedef struct {
-    uint8_t statu;
+    uint8_t state;
     RC_ctrl_t state_interfaces;
     Usart_Device_t* usart_info;
 
@@ -83,7 +82,6 @@ typedef struct {
  * ------------------------------------- */
 RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg);
 void rmRemoteDelete(RM_Remote_t* remote);
-void rmRemoteCallback(Usart_Device_t* instance);
 uint8_t rmRemoteIsError();
 void solveRCLost(void);
 void solveDataError(void);

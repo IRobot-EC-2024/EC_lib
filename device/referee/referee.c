@@ -2,27 +2,39 @@
  * @Author       : Specific_Cola specificcola@proton.me
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 13:23:00
+ * @LastEditTime : 2024-04-15 02:07:16
  * @Description  :
  * @Filename     : referee.c
  * @
  */
 #include "referee.h"
 
-#define REFEREE_FIFO_BUF_LENGTH 1024
+#include "Client_UI.h"
+
+#define REFEREE_FIFO_BUF_LENGTH 512
+#define REFEREE_SEND_FIFO_BUF_LENGTH 512
+#define REFEREE_FIGURE_FIFO_ELEMENT_NUM 16
+#define REFEREE_FIGURE_FIFO_ELEMENT_SIZE 15
+
+#define Robot_ID UI_Data_RobotID_BEngineer
+#define Cilent_ID UI_Data_CilentID_BEngineer  // 机器人角色设置
 
 static Referee_t* referee_instance;
 
-uint8_t referee_fifo_buf[REFEREE_FIFO_BUF_LENGTH];
+uint8_t referee_receive_fifo_buf[REFEREE_FIFO_BUF_LENGTH];
+
+// 裁判系统通信发送fifo
+uint8_t referee_send_fifo_buf[REFEREE_SEND_FIFO_BUF_LENGTH];
+uint8_t referee_figure_fifo_buf[REFEREE_FIGURE_FIFO_ELEMENT_NUM * REFEREE_FIGURE_FIFO_ELEMENT_SIZE];
 
 // 裁判系统通信接收
 static void refereeReceiverCallback(Usart_Device_t* usart) {
     if (usart == NULL || usart->parent == NULL) return;
 
-    if (usart->rx_info.rx_buff_select) {
-        fifo_s_puts(&referee_instance->referee_fifo, (char*)usart->rx_buff, usart->rx_info.this_time_rx_len);
+    if (!usart->rx_info.rx_buff_select) {
+        fifo_s_puts(&referee_instance->referee_receive_fifo, (char*)usart->rx_buff, usart->rx_info.this_time_rx_len);
     } else {
-        fifo_s_puts(&referee_instance->referee_fifo, (char*)usart->rx_buff2, usart->rx_info.this_time_rx_len);
+        fifo_s_puts(&referee_instance->referee_receive_fifo, (char*)usart->rx_buff2, usart->rx_info.this_time_rx_len);
     }
 }
 
@@ -34,29 +46,43 @@ static void refereeOfflineCallback(Usart_Device_t* usart) {
 }
 
 Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* huart2) {
+    if (huart1 == NULL && huart2 == NULL) return NULL;
+
     Referee_t* referee = (Referee_t*)malloc(sizeof(Referee_t));
     memset(referee, 0, sizeof(Referee_t));
 
     Usart_Register_t usart_reg;
-    memset(referee, 0, sizeof(Referee_t));
-    usart_reg.usart_handle = huart1;
-    usart_reg.rx_buff_num = 1;
-    usart_reg.rx_len = 256;
-    usart_reg.usart_device_callback = refereeReceiverCallback;
-    usart_reg.parent = referee;
-    referee->usart_info = usartDeviceRegister(&usart_reg);
+
+    if (huart1 != NULL) {
+        memset(&usart_reg, 0, sizeof(Usart_Register_t));
+        usart_reg.usart_handle = huart1;
+        usart_reg.rx_buff_num = 1;
+        usart_reg.rx_len = 256;
+        usart_reg.usart_device_callback = refereeReceiverCallback;
+        usart_reg.usart_device_offline_callback = refereeOfflineCallback;
+        usart_reg.parent = referee;
+        usart_reg.offline_threshold = 100;
+        referee->usart_info = usartDeviceRegister(&usart_reg);
+        fifo_s_init(&referee->referee_send_fifo, referee_send_fifo_buf, REFEREE_SEND_FIFO_BUF_LENGTH);
+        fifo_init(&referee->referee_figure_fifo, referee_figure_fifo_buf, REFEREE_FIGURE_FIFO_ELEMENT_SIZE,
+                  REFEREE_FIGURE_FIFO_ELEMENT_NUM);
+    }
 
     if (huart2 != NULL) {
-        memset(referee, 0, sizeof(Referee_t));
+        memset(&usart_reg, 0, sizeof(Usart_Register_t));
         usart_reg.usart_handle = huart2;
         usart_reg.rx_buff_num = 1;
         usart_reg.rx_len = 256;
         usart_reg.usart_device_callback = refereeReceiverCallback;
+        usart_reg.usart_device_offline_callback = refereeOfflineCallback;
+        usart_reg.parent = referee;
+        usart_reg.offline_threshold = 100;
         referee->vision_info = usartDeviceRegister(&usart_reg);
     }
 
-    fifo_s_init(&referee->referee_fifo, referee_fifo_buf, REFEREE_FIFO_BUF_LENGTH);
+    fifo_s_init(&referee->referee_receive_fifo, referee_receive_fifo_buf, REFEREE_FIFO_BUF_LENGTH);
 
+    referee->state = STATE_ONLINE;
     referee_instance = referee;
     return referee;
 }
@@ -75,22 +101,17 @@ void referee_data_solve(uint8_t* frame) {
     memcpy(&cmd_id, frame + index, sizeof(uint16_t));
     index += sizeof(uint16_t);
 
-    referee_instance->status[cmd_id >> 8][cmd_id & 0x0f] = 1;
-    referee_instance->offline_counter[cmd_id >> 8][cmd_id & 0x0f] = 0;
+    referee_instance->receive_time_stemp[cmd_id >> 8][cmd_id & 0x0f] = HAL_GetTick();
 
     switch (cmd_id) {
         case GAME_STATE_CMD_ID: {
             memcpy(&referee_instance->referee_info.game_state, frame + index, sizeof(game_state_t));
-            //						EnQueue(&SendBuffer[0],
-            // send_game_status(),11);
         } break;
         case GAME_RESULT_CMD_ID: {
             memcpy(&referee_instance->referee_info.game_result, frame + index, sizeof(game_result_t));
         } break;
         case GAME_ROBOT_HP_CMD_ID: {
             memcpy(&referee_instance->referee_info.game_robot_HP, frame + index, sizeof(game_robot_HP_t));
-            //						EnQueue(&SendBuffer[1],
-            // send_enemy_information(),11);
         } break;
         case EVENT_DATA_CMD_ID: {
             memcpy(&referee_instance->referee_info.event_data, frame + index, sizeof(event_data_t));
@@ -108,14 +129,9 @@ void referee_data_solve(uint8_t* frame) {
 
         case ROBOT_STATE_CMD_ID: {
             memcpy(&referee_instance->referee_info.robot_status, frame + index, sizeof(robot_status_t));
-            //						EnQueue(&SendBuffer[1],
-            // send_bullet_limit(),33);
-            // EnQueue(&SendBuffer[1], send_robot_information(),11);
         } break;
         case POWER_HEAT_DATA_CMD_ID: {
             memcpy(&referee_instance->referee_info.power_heat_data, frame + index, sizeof(power_heat_data_t));
-            //						EnQueue(&SendBuffer[0],
-            // send_power_heat_data(),22);
         } break;
         case ROBOT_POS_CMD_ID: {
             memcpy(&referee_instance->referee_info.robot_pos, frame + index, sizeof(robot_pos_t));
@@ -131,8 +147,6 @@ void referee_data_solve(uint8_t* frame) {
         } break;
         case SHOOT_DATA_CMD_ID: {
             memcpy(&referee_instance->referee_info.shoot_data, frame + index, sizeof(shoot_data_t));
-            //						EnQueue(&SendBuffer[0],
-            // send_bullet_speed(),11);
         } break;
         case PROJECTILE_ALLOWANCE_CMD_ID: {
             memcpy(&referee_instance->referee_info.projectile_allowance, frame + index, sizeof(projectile_allowance_t));
@@ -184,19 +198,168 @@ void referee_data_solve(uint8_t* frame) {
     }
 }
 
-// 裁判系统通信发送
+/**
+ * @brief          单字节解包
+ * @param[in]      void
+ * @retval         none
+ */
+void referee_unpack_fifo_data(void) {
+    uint8_t byte = 0;
+    uint8_t sof = HEADER_SOF;
+    unpack_data_t* p_obj = &referee_instance->referee_unpack_obj;
 
-void referee_status_updata(void) {
-    uint8_t i = 0, j = 0;
-
-    for (i = 0; i < 4; i++) {
-        for (j = 0; j < 16; j++) {
-            if (referee_instance->status[i][j]) {
-                referee_instance->offline_counter[i][j]++;
-                if (referee_instance->offline_counter[i][j] > 1000) {
-                    referee_instance->status[i][j] = 0;
+    while (fifo_s_used(&referee_instance->referee_receive_fifo)) {
+        byte = fifo_s_get(&referee_instance->referee_receive_fifo);
+        switch (p_obj->unpack_step) {
+            case STEP_HEADER_SOF: {
+                if (byte == sof) {
+                    p_obj->unpack_step = STEP_LENGTH_LOW;
+                    p_obj->protocol_packet[p_obj->index++] = byte;
+                } else {
+                    p_obj->index = 0;
                 }
+            } break;
+
+            case STEP_LENGTH_LOW: {
+                p_obj->data_len = byte;
+                p_obj->protocol_packet[p_obj->index++] = byte;
+                p_obj->unpack_step = STEP_LENGTH_HIGH;
+            } break;
+
+            case STEP_LENGTH_HIGH: {
+                p_obj->data_len |= (byte << 8);
+                p_obj->protocol_packet[p_obj->index++] = byte;
+
+                if (p_obj->data_len < (REF_PROTOCOL_FRAME_MAX_SIZE - REF_HEADER_CRC_CMDID_LEN)) {
+                    p_obj->unpack_step = STEP_FRAME_SEQ;
+                } else {
+                    p_obj->unpack_step = STEP_HEADER_SOF;
+                    p_obj->index = 0;
+                }
+            } break;
+            case STEP_FRAME_SEQ: {
+                p_obj->protocol_packet[p_obj->index++] = byte;
+                p_obj->unpack_step = STEP_HEADER_CRC8;
+            } break;
+
+            case STEP_HEADER_CRC8: {
+                p_obj->protocol_packet[p_obj->index++] = byte;
+
+                if (p_obj->index == REF_PROTOCOL_HEADER_SIZE) {
+                    if (crc_8(p_obj->protocol_packet, REF_PROTOCOL_HEADER_SIZE)) {
+                        p_obj->unpack_step = STEP_DATA_CRC16;
+                    } else {
+                        p_obj->unpack_step = STEP_HEADER_SOF;
+                        p_obj->index = 0;
+                    }
+                }
+            } break;
+
+            case STEP_DATA_CRC16: {
+                if (p_obj->index < (REF_HEADER_CRC_CMDID_LEN + p_obj->data_len)) {
+                    p_obj->protocol_packet[p_obj->index++] = byte;
+                }
+                if (p_obj->index >= (REF_HEADER_CRC_CMDID_LEN + p_obj->data_len)) {
+                    p_obj->unpack_step = STEP_HEADER_SOF;
+                    p_obj->index = 0;
+
+                    if (crc_16(p_obj->protocol_packet, REF_HEADER_CRC_CMDID_LEN + p_obj->data_len)) {
+                        referee_data_solve(p_obj->protocol_packet);
+                    }
+                }
+            } break;
+
+            default: {
+                p_obj->unpack_step = STEP_HEADER_SOF;
+                p_obj->index = 0;
+            } break;
+        }
+    }
+}
+
+// 裁判系统通信发送
+void refereeInteractionPush(robot_interaction_data_t* interaction_data, uint8_t user_data_length) {
+    if (interaction_data == NULL || user_data_length > ROBOT_INTERACTION_DATA_LENGTH) return;
+
+    uint8_t i = 0;
+
+    fifo_s_put(&referee_instance->referee_send_fifo, user_data_length);
+    fifo_s_puts(&referee_instance->referee_send_fifo, (char*)interaction_data, user_data_length);
+}
+
+/**
+ * @description: 裁判系统通信发送，需要10Hz定频调用
+ * @return {*}
+ */
+void refereeInteractionSend() {
+    if (!referee_instance->referee_send_fifo.used_num) return;
+    static robot_interaction_data_t interaction_data;
+    static frame_header_struct_t framehead;
+    static uint8_t tx_data[128];
+
+    uint8_t i = 0, ptr = 0;
+    uint8_t data_length = 0;
+    uint16_t cmd_id = 0, ui_crc_16 = 0;
+
+    data_length = fifo_s_get(&referee_instance->referee_send_fifo);
+    fifo_s_gets(&referee_instance->referee_send_fifo, (char*)&interaction_data, data_length);
+
+    framehead.SOF = UI_SOF;
+    framehead.data_length = data_length;
+    framehead.seq = referee_instance->seq++;
+    framehead.CRC8 = Get_CRC8_Check_Sum_UI((uint8_t*)&framehead, 4, 0xFF);
+
+    memset(tx_data, 0, sizeof(tx_data));
+    memcpy(tx_data + ptr, &framehead, sizeof(frame_header_struct_t));
+    ptr += sizeof(frame_header_struct_t);
+
+    cmd_id = 0x0301;
+    memcpy(tx_data + ptr, &cmd_id, sizeof(uint16_t));
+    ptr += sizeof(uint16_t);
+
+    memcpy(tx_data + ptr, &interaction_data, data_length);
+    ptr += data_length;
+
+    ui_crc_16 = Get_CRC16_Check_Sum_UI(tx_data, ptr, 0xFFFF);
+    memcpy(tx_data + ptr, &ui_crc_16, sizeof(uint16_t));
+    ptr += sizeof(uint16_t);
+
+    usartSendMessage(referee_instance->usart_info, tx_data, ptr, USART_TRANSFER_DMA);
+}
+
+uint32_t refereeInteractionRemain() { return referee_instance->referee_send_fifo.used_num; }
+
+void refereeFigurePush(interaction_figure_t* interaction_figure) {
+    fifo_put(&referee_instance->referee_figure_fifo, interaction_figure);
+}
+
+void refereeFigure2Interaction() {
+    // 图像数目种类
+    static uint8_t figure_bag_type[4] = {7, 5, 2, 1};
+
+    // 循环变量
+    uint8_t i = 0, type = 0;
+
+    robot_interaction_data_t interaction_data;
+    interaction_figure_t interaction_figure[7];
+
+    uint8_t figure_num = referee_instance->referee_figure_fifo.used_num;
+    uint8_t figure_bag = figure_bag_type[0];
+
+    for (type = 0; type < 4; type++) {
+        figure_bag = figure_bag_type[type];
+
+        interaction_data.data_cmd_id = 0x0104 - type;
+
+        interaction_data.receiver_id = Cilent_ID;
+        interaction_data.sender_id = Robot_ID;
+
+        for (; figure_num >= figure_bag; figure_num -= figure_bag) {
+            for (i = 0; i < figure_bag; i++) {
+                fifo_get(&referee_instance->referee_figure_fifo, &interaction_figure[i]);
             }
+            memcpy(interaction_data.user_data, interaction_figure, sizeof(interaction_figure_t) * figure_bag);
+            refereeInteractionPush(&interaction_data, sizeof(interaction_figure_t) * figure_bag + 6);
         }
     }
 }

@@ -2,7 +2,7 @@
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-11 00:52:19
+ * @LastEditTime : 2024-04-15 02:05:20
  * @Description  :
  * @Filename     : bsp_usart.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -103,6 +103,8 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     }
 
     instance->usart_device_callback = reg->usart_device_callback;
+    instance->usart_device_offline_callback = reg->usart_device_offline_callback;
+    instance->parent = reg->parent;
 
     Monitor_Register_t monitor_reg;
 
@@ -151,9 +153,8 @@ Return_t usartSendMessage(Usart_Device_t* instance, uint8_t* message, uint16_t t
     return ret;
 }
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart,
-                                uint16_t size)  // todo  双缓存区如何接收
-{
+// todo  双缓存区如何接收
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t size) {
     // find the instance which is being handled
     for (uint8_t i = 0; i < id_cnt; ++i) {
         // call the callback function
@@ -166,9 +167,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart,
                 if (usart_device[i]->usart_device_callback != NULL) {
                     usart_device[i]->rx_info.this_time_rx_len = size;
                     usart_device[i]->usart_device_callback(usart_device[i]);
-                    memset(usart_device[i]->rx_buff, 0,
-                           size);  // 接收结束后清空buffer,对于变长数据是必要的
-                                   // 如果需要清除，就在回调函数里清除
+                    // 接收结束后清空buffer,对于变长数据是必要的
+                    memset(usart_device[i]->rx_buff, 0, size);
+                    // 如果需要清除，就在回调函数里清除
                 }
             } else {
                 if (usart_device[i]->usart_device_callback != NULL) {
@@ -180,6 +181,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart,
                 }
                 usartDMARestart(usart_device[i]);
             }
+
+            monitorRefresh(usart_device[i]->monitor_handle);
+            usart_device[i]->state = STATE_ONLINE;
             return;  // break the loop
         }
     }

@@ -1,14 +1,13 @@
-//=====================================================================================================
-// RM_remote.c
-//=====================================================================================================
-//
-//       IRobot  EC_lib
-//
-// author: @ dji
-// modify: @ Specific_Cola
-//
-//
-//=====================================================================================================
+/**
+ * @Author       : Specific-Cola specificcola@proton.me
+ * @Date         : 2024-04-08 11:31:11
+ * @LastEditors  : H0pefu12 573341043@qq.com
+ * @LastEditTime : 2024-04-15 02:08:13
+ * @Description  :
+ * @Filename     : RM_remote.c
+ * @Copyright (c) 2024 by IRobot, All Rights Reserved.
+ * @
+ */
 #include "RM_remote.h"
 
 #include <stdlib.h>
@@ -23,26 +22,18 @@ static uint16_t KeyJumpChannal = 0;
 static uint16_t KeyUsed = 0;
 
 // 取正函数
-static int16_t RC_abs(int16_t value);
-
-RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg) {
-    RM_Remote_t* remote = (RM_Remote_t*)malloc(sizeof(RM_Remote_t));
-    Usart_Register_t usart;
-    memset(remote, 0, sizeof(RM_Remote_t));
-    usart.usart_handle = remote_reg->usart_handle;
-    usart.rx_buff_num = 1;
-    usart.rx_len = RC_FRAME_LENGTH;
-    usart.usart_device_callback = rmRemoteCallback;
-    remote->usart_info = usartDeviceRegister(&usart);
-
-    remote_instance = remote;
-    return remote;
+static int16_t RC_abs(int16_t value) {
+    if (value > 0) {
+        return value;
+    } else {
+        return -value;
+    }
 }
 
 void rmRemoteCallback(Usart_Device_t* usart) {
     if (usart->rx_info.this_time_rx_len == RC_FRAME_LENGTH) {
         // 处理遥控器数据
-        if (!usart->rx_info.rx_buff_select) {
+        if (usart->rx_info.rx_buff_select) {
             sbus_to_rc(usart->rx_buff);
         } else {
             sbus_to_rc(usart->rx_buff2);
@@ -51,13 +42,27 @@ void rmRemoteCallback(Usart_Device_t* usart) {
     }
 }
 
-// 取正函数
-static int16_t RC_abs(int16_t value) {
-    if (value > 0) {
-        return value;
-    } else {
-        return -value;
-    }
+static void rmRemoteOfflineCallback(Usart_Device_t* usart) {
+    if (usart == NULL || usart->parent == NULL) return;
+    RM_Remote_t* remote = usart->parent;
+    remote->state = STATE_OFFLINE;
+    memset(&remote->state_interfaces, 0, sizeof(RC_ctrl_t));
+}
+
+RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg) {
+    RM_Remote_t* remote = (RM_Remote_t*)malloc(sizeof(RM_Remote_t));
+    memset(remote, 0, sizeof(RM_Remote_t));
+
+    Usart_Register_t usart;
+    memset(&usart, 0, sizeof(Usart_Register_t));
+    usart.usart_handle = remote_reg->usart_handle;
+    usart.rx_buff_num = 1;
+    usart.rx_len = RC_FRAME_LENGTH;
+    usart.usart_device_callback = rmRemoteCallback;
+    remote->usart_info = usartDeviceRegister(&usart);
+
+    remote_instance = remote;
+    return remote;
 }
 
 uint8_t rmRemoteIsError() {
