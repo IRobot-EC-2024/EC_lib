@@ -42,7 +42,7 @@ RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg) {
 void rmRemoteCallback(Usart_Device_t* usart) {
     if (usart->rx_info.this_time_rx_len == RC_FRAME_LENGTH) {
         // 处理遥控器数据
-        if (usart->rx_info.rx_buff_select) {
+        if (!usart->rx_info.rx_buff_select) {
             sbus_to_rc(usart->rx_buff);
         } else {
             sbus_to_rc(usart->rx_buff2);
