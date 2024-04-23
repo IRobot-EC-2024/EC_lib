@@ -2,7 +2,7 @@
  * @Author       : H0pefu12 573341043@qq.com
  * @Date         : 2024-04-01 00:59:52
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 23:40:38
+ * @LastEditTime : 2024-04-21 02:28:40
  * @Description  :
  * @Filename     : Motor.h
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -11,15 +11,47 @@
 #ifndef MOTOR_H__
 #define MOTOR_H__
 
-#include "DMMotor.h"
-#include "RMDMotor.h"
 #include "controller.h"
-#include "djiMotor.h"
 #include "main.h"
 #include "struct_typedef.h"
 
+// 电机小类头
+#include "DMMotor.h"
+#include "RMDMotor.h"
+#include "ServoMotor.h"
+#include "djiMotor.h"
+
 #define MAX_MOTOR_NUM 30      //
 #define OFFLINE_TIME_MAX 0.1  // 单位s
+
+// 电机控制方式
+typedef enum {
+    MOTOR_CM_COMMAND_MODE = 0,  // 不知道该选什么就选它
+
+    MOTOR_CM_SPEED_MODE = 1,     // 速度控制
+    MOTOR_CM_POSITION_MODE = 2,  // 位置控制
+    MOTOR_CM_CURRENT_MODE = 3,   // 电流控制
+    MOTOR_CM_TORQUE_MODE = 4,    // 转矩控制
+} Motor_Control_Mode_t;
+
+typedef enum {
+    OPEN_LOOP = 0b0000,
+    CURRENT_LOOP = 0b0001,
+    SPEED_LOOP = 0b0010,
+    ANGLE_LOOP = 0b0100,
+} Closeloop_Type_t;
+
+typedef struct {
+    PIDInstance* angle_pid;
+    PIDInstance* speed_pid;
+    PIDInstance* current_pid;
+
+    // 其他反馈来源的反馈数据指针
+    fp32* angle_feedback;
+    fp32* speed_feedback;
+
+    fp32* fdb_src;
+} Motor_Control_t;
 
 typedef struct {
     fp32 last_angle;
@@ -44,16 +76,20 @@ typedef struct {
 } Motor_Command_t;
 
 typedef struct {
-	uint8_t statu;  // online 0  / offline 1
-	uint8_t motor_type;
-	union {
+    uint8_t statu;  // online 0  / offline 1
+    uint8_t motor_type;
+
+    Motor_Control_Mode_t control_mode;
+
+    Motor_Info_t state_interfaces;
+    Motor_Command_t command_interfaces;
+
+    // 原始电机指针
+    union {
         DJI_Motor_t* dji;
         DM_Motor_t* dm;
         RMD_Motor_t* rmd;
     };
-
-    Motor_Info_t state_interfaces;
-    Motor_Command_t command_interfaces;
 } Motor_t;
 
 typedef union {
@@ -95,13 +131,16 @@ extern Return_t dmMotorSendAll();
 void motorSpeedControl(Motor_t* motor,
                        Speed_Controller_t* controller);  // todo    移到电机总
 Speed_Controller_t* speedControllerInit(PID_Init_Config_s* config);
-void motorPositionControl(
-    Motor_t* motor, Position_Controller_t* controller);  // todo   移到电机总
-Position_Controller_t* positionControllerInit(cascade_PID_Init_Config_s* config,
-                                              float* out_fdb);
+void motorPositionControl(Motor_t* motor, Position_Controller_t* controller);  // todo   移到电机总
+Position_Controller_t* positionControllerInit(cascade_PID_Init_Config_s* config, float* out_fdb);
 
 // 电机测试应用
 bool_t motorBlockJudgment(Motor_t* motor, float speed_upper_limit);
 void motor_SwitchRing(Motor_t* motor, Position_Controller_t* controller);
+
+// todo...
+
+// 电机闭环与发送
+void motorTask(void);
 
 #endif

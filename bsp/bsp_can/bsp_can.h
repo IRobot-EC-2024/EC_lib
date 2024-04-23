@@ -2,7 +2,7 @@
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-04-07 00:48:03
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 13:41:30
+ * @LastEditTime : 2024-04-17 02:37:47
  * @Description  :
  * @Filename     : bsp_can.h
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -24,8 +24,10 @@
 
 #ifdef CAN_DEVICE
 #include "can.h"
+typedef CAN_HandleTypeDef Can_Handle_t;
 #elif defined(FDCAN_DEVICE)
 #include "fdcan.h"
+typedef FDCAN_HandleTypeDef Can_Handle_t;
 #endif
 
 #include "bsp_monitor.h"
