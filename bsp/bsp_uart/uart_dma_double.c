@@ -2,13 +2,15 @@
  * @Author       : H0pefu12 573341043@qq.com
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-15 02:05:33
+ * @LastEditTime : 2024-04-17 05:40:20
  * @Description  :
  * @Filename     : uart_dma_double.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
  * @
  */
 #include "uart_dma_double.h"
+
+uint8_t test1=0,test2=0;
 
 #if defined(STM32H723xx)
 /**
@@ -20,8 +22,7 @@
 static void UART_EndRxTransfer(UART_HandleTypeDef* huart) {
     /* Disable RXNE, PE and ERR (Frame error, noise error, overrun error)
      * interrupts */
-    ATOMIC_CLEAR_BIT(huart->Instance->CR1,
-                     (USART_CR1_RXNEIE_RXFNEIE | USART_CR1_PEIE));
+    ATOMIC_CLEAR_BIT(huart->Instance->CR1, (USART_CR1_RXNEIE_RXFNEIE | USART_CR1_PEIE));
     ATOMIC_CLEAR_BIT(huart->Instance->CR3, (USART_CR3_EIE | USART_CR3_RXFTIE));
 
     /* In case of reception waiting for IDLE event, disable also the IDLE IE
@@ -46,8 +47,7 @@ static void UART_EndRxTransfer(UART_HandleTypeDef* huart) {
  */
 static void UART_EndTxTransfer(UART_HandleTypeDef* huart) {
     /* Disable TXEIE, TCIE, TXFT interrupts */
-    ATOMIC_CLEAR_BIT(huart->Instance->CR1,
-                     (USART_CR1_TXEIE_TXFNFIE | USART_CR1_TCIE));
+    ATOMIC_CLEAR_BIT(huart->Instance->CR1, (USART_CR1_TXEIE_TXFNFIE | USART_CR1_TCIE));
     ATOMIC_CLEAR_BIT(huart->Instance->CR3, (USART_CR3_TXFTIE));
 
     /* At end of Tx process, restore huart->gState to Ready */
@@ -59,7 +59,7 @@ static void UART_EndTxTransfer(UART_HandleTypeDef* huart) {
  * @param hdma DMA handle.
  * @retval None
  */
-static void UART_DMAReceiveCplt(DMA_HandleTypeDef* hdma) {
+static void UART_DMAReceiveCplt0(DMA_HandleTypeDef* hdma) {
     UART_HandleTypeDef* huart = (UART_HandleTypeDef*)(hdma->Parent);
 
     /* DMA Normal mode */
@@ -107,40 +107,65 @@ static void UART_DMAReceiveCplt(DMA_HandleTypeDef* hdma) {
 #else
         /*Call legacy weak Rx complete callback*/
         HAL_UART_RxCpltCallback(huart);
+		test1++;
 #endif /* USE_HAL_UART_REGISTER_CALLBACKS */
     }
 }
 
 /**
- * @brief DMA UART receive process half complete callback.
+ * @brief DMA UART receive process complete callback.
  * @param hdma DMA handle.
  * @retval None
  */
-static void UART_DMARxHalfCplt(DMA_HandleTypeDef* hdma) {
+static void UART_DMAReceiveCplt1(DMA_HandleTypeDef* hdma) {
     UART_HandleTypeDef* huart = (UART_HandleTypeDef*)(hdma->Parent);
 
+    /* DMA Normal mode */
+    if (hdma->Init.Mode != DMA_CIRCULAR) {
+        huart->RxXferCount = 0U;
+
+        /* Disable PE and ERR (Frame error, noise error, overrun error)
+         * interrupts */
+        ATOMIC_CLEAR_BIT(huart->Instance->CR1, USART_CR1_PEIE);
+        ATOMIC_CLEAR_BIT(huart->Instance->CR3, USART_CR3_EIE);
+
+        /* Disable the DMA transfer for the receiver request by resetting the
+           DMAR bit in the UART CR3 register */
+        ATOMIC_CLEAR_BIT(huart->Instance->CR3, USART_CR3_DMAR);
+
+        /* At end of Rx process, restore huart->RxState to Ready */
+        huart->RxState = HAL_UART_STATE_READY;
+
+        /* If Reception till IDLE event has been selected, Disable IDLE
+         * Interrupt */
+        if (huart->ReceptionType == HAL_UART_RECEPTION_TOIDLE) {
+            ATOMIC_CLEAR_BIT(huart->Instance->CR1, USART_CR1_IDLEIE);
+        }
+    }
+
     /* Initialize type of RxEvent that correspond to RxEvent callback execution;
-       In this case, Rx Event type is Half Transfer */
-    huart->RxEventType = HAL_UART_RXEVENT_HT;
+       In this case, Rx Event type is Transfer Complete */
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     /* Check current reception Mode :
        If Reception till IDLE event has been selected : use Rx Event callback */
     if (huart->ReceptionType == HAL_UART_RECEPTION_TOIDLE) {
 #if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
         /*Call registered Rx Event callback*/
-        huart->RxEventCallback(huart, huart->RxXferSize / 2U);
+        huart->RxEventCallback(huart, huart->RxXferSize);
 #else
         /*Call legacy weak Rx Event callback*/
-        HAL_UARTEx_RxEventCallback(huart, huart->RxXferSize / 2U);
+        HAL_UARTEx_RxEventCallback(huart, huart->RxXferSize);
 #endif /* USE_HAL_UART_REGISTER_CALLBACKS */
     } else {
-        /* In other cases : use Rx Half Complete callback */
+        /* In other cases : use Rx Complete callback */
 #if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
-        /*Call registered Rx Half complete callback*/
-        huart->RxHalfCpltCallback(huart);
+        /*Call registered Rx complete callback*/
+        huart->RxCpltCallback(huart);
 #else
-        /*Call legacy weak Rx Half complete callback*/
-        HAL_UART_RxHalfCpltCallback(huart);
+        /*Call legacy weak Rx complete callback*/
+        HAL_UART_RxCpltCallback(huart);
+		test2++;
 #endif /* USE_HAL_UART_REGISTER_CALLBACKS */
     }
 }
@@ -157,15 +182,13 @@ static void UART_DMAError(DMA_HandleTypeDef* hdma) {
     const HAL_UART_StateTypeDef rxstate = huart->RxState;
 
     /* Stop UART DMA Tx request if ongoing */
-    if ((HAL_IS_BIT_SET(huart->Instance->CR3, USART_CR3_DMAT)) &&
-        (gstate == HAL_UART_STATE_BUSY_TX)) {
+    if ((HAL_IS_BIT_SET(huart->Instance->CR3, USART_CR3_DMAT)) && (gstate == HAL_UART_STATE_BUSY_TX)) {
         huart->TxXferCount = 0U;
         UART_EndTxTransfer(huart);
     }
 
     /* Stop UART DMA Rx request if ongoing */
-    if ((HAL_IS_BIT_SET(huart->Instance->CR3, USART_CR3_DMAR)) &&
-        (rxstate == HAL_UART_STATE_BUSY_RX)) {
+    if ((HAL_IS_BIT_SET(huart->Instance->CR3, USART_CR3_DMAR)) && (rxstate == HAL_UART_STATE_BUSY_RX)) {
         huart->RxXferCount = 0U;
         UART_EndRxTransfer(huart);
     }
@@ -193,8 +216,7 @@ static void UART_DMAError(DMA_HandleTypeDef* hdma) {
  * @param  Size  Amount of data elements (u8 or u16) to be received.
  * @retval HAL status
  */
-HAL_StatusTypeDef UART_Start_Receive_DMA_double(UART_HandleTypeDef* huart,
-                                                uint8_t* pData, uint8_t* pData1,
+HAL_StatusTypeDef UART_Start_Receive_DMA_double(UART_HandleTypeDef* huart, uint8_t* pData, uint8_t* pData1,
                                                 uint16_t Size) {
     huart->pRxBuffPtr = pData;
     huart->RxXferSize = Size;
@@ -204,12 +226,12 @@ HAL_StatusTypeDef UART_Start_Receive_DMA_double(UART_HandleTypeDef* huart,
 
     if (huart->hdmarx != NULL) {
         /* Set the UART DMA transfer complete callback */
-        huart->hdmarx->XferCpltCallback = UART_DMAReceiveCplt;
-        huart->hdmarx->XferM1CpltCallback = UART_DMAReceiveCplt;
+        huart->hdmarx->XferCpltCallback = UART_DMAReceiveCplt0;
+        huart->hdmarx->XferM1CpltCallback = UART_DMAReceiveCplt1;
 
         /* Set the UART DMA Half transfer complete callback */
-        huart->hdmarx->XferHalfCpltCallback = UART_DMARxHalfCplt;
-        huart->hdmarx->XferM1HalfCpltCallback = UART_DMARxHalfCplt;
+        huart->hdmarx->XferHalfCpltCallback = NULL;
+        huart->hdmarx->XferM1HalfCpltCallback = NULL;
 
         /* Set the DMA error callback */
         huart->hdmarx->XferErrorCallback = UART_DMAError;
@@ -218,16 +240,15 @@ HAL_StatusTypeDef UART_Start_Receive_DMA_double(UART_HandleTypeDef* huart,
         huart->hdmarx->XferAbortCallback = NULL;
 
         /* Enable the DMA channel */
-        if (HAL_DMAEx_MultiBufferStart_IT(
-                huart->hdmarx, (uint32_t)&huart->Instance->RDR, (uint32_t)pData,
-                (uint32_t)pData1, Size) != HAL_OK) {
+        if (HAL_DMAEx_MultiBufferStart_IT(huart->hdmarx, (uint32_t)&huart->Instance->RDR, (uint32_t)pData,
+                                          (uint32_t)pData1, Size) != HAL_OK) {
             /* Set error code to DMA */
-            huart->ErrorCode = HAL_UART_ERROR_DMA;
+//            huart->ErrorCode = HAL_UART_ERROR_DMA;
 
-            /* Restore huart->RxState to ready */
-            huart->RxState = HAL_UART_STATE_READY;
+//            /* Restore huart->RxState to ready */
+//            huart->RxState = HAL_UART_STATE_READY;
 
-            return HAL_ERROR;
+//            return HAL_ERROR;
         }
     }
 
@@ -254,9 +275,7 @@ HAL_StatusTypeDef UART_Start_Receive_DMA_double(UART_HandleTypeDef* huart,
  * @param Size  Amount of data elements (uint8_t or uint16_t) to be received.
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA_double(UART_HandleTypeDef* huart,
-                                                      uint8_t* pData,
-                                                      uint8_t* pData1,
+HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA_double(UART_HandleTypeDef* huart, uint8_t* pData, uint8_t* pData1,
                                                       uint16_t Size) {
     HAL_StatusTypeDef status;
 
@@ -293,9 +312,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA_double(UART_HandleTypeDef* huart,
     }
 }
 #elif defined(STM32F427xx) || defined(STM32F407xx)
-HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA_double(UART_HandleTypeDef* huart,
-                                                      uint8_t* pData,
-                                                      uint8_t* pData1,
+HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA_double(UART_HandleTypeDef* huart, uint8_t* pData, uint8_t* pData1,
                                                       uint16_t Size) {
     return HAL_ERROR;
 }

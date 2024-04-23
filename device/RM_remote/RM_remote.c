@@ -21,6 +21,7 @@ static uint16_t KeyFormerChannal = 0;
 static uint16_t KeyJumpChannal = 0;
 static uint16_t KeyUsed = 0;
 
+
 // 取正函数
 static int16_t RC_abs(int16_t value) {
     if (value > 0) {
@@ -33,7 +34,7 @@ static int16_t RC_abs(int16_t value) {
 void rmRemoteCallback(Usart_Device_t* usart) {
     if (usart->rx_info.this_time_rx_len == RC_FRAME_LENGTH) {
         // 处理遥控器数据
-        if (usart->rx_info.rx_buff_select) {
+        if (!usart->rx_info.rx_buff_select) {
             sbus_to_rc(usart->rx_buff);
         } else {
             sbus_to_rc(usart->rx_buff2);
