@@ -2,7 +2,7 @@
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-13 01:48:51
+ * @LastEditTime : 2024-04-20 12:46:31
  * @Description  :
  * @Filename     : bsp_usart.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -16,13 +16,14 @@
 #include "uart_dma_double.h"
 
 #if defined(STM32H723xx)
-#define DMA_GET_DBM(hdma)                                                           \
-    ((hdma) != 0 ? (((DMA_Stream_TypeDef*)hdma->Instance)->CR & DMA_SxCR_CIRC) != 0 \
-                 : (((BDMA_Channel_TypeDef*)hdma->Instance)->CCR & BDMA_CCR_CIRC) != 0)
+#define DMA_GET_DBM(hdma)                                                         \
+    ((hdma) != 0 ? (((DMA_Stream_TypeDef*)hdma->Instance)->CR & DMA_SxCR_CT) == 0 \
+                 : (((BDMA_Channel_TypeDef*)hdma->Instance)->CCR & BDMA_CCR_CT) == 0)
 #elif defined(STM32F427xx) || defined(STM32F407xx)
 #define DMA_GET_DBM(hdma) ((((DMA_Stream_TypeDef*)hdma->Instance)->CR & DMA_SxCR_CIRC) != 0)
 
 #endif
+
 static Usart_Device_t* usart_device[USART_MX_REGISTER_CNT] = {NULL};
 static uint8_t id_cnt = 0;  // 全局USART实例索引,每次有新的模块注册会自增
 
@@ -33,9 +34,6 @@ static void usartDMARestart(Usart_Device_t* instance) {
             __HAL_DMA_DISABLE_IT(instance->usart_handle->hdmarx, DMA_IT_HT);
             break;
         case 2:
-            HAL_UARTEx_ReceiveToIdle_DMA_double(instance->usart_handle, instance->rx_buff, instance->rx_buff2,
-                                                instance->rx_len);
-            __HAL_DMA_DISABLE_IT(instance->usart_handle->hdmarx, DMA_IT_HT);
             break;
         default:
             break;
@@ -99,6 +97,8 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     instance->rx_buff = (uint8_t*)malloc(instance->rx_len);
     if (instance->rx_buff_num == 2) {
         instance->rx_buff2 = (uint8_t*)malloc(instance->rx_len);
+        // 双缓冲区使用循环DMA
+        instance->usart_handle->hdmarx->Init.Mode = DMA_CIRCULAR;
     }
 
     instance->usart_device_callback = reg->usart_device_callback;
@@ -113,6 +113,11 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     instance->monitor_handle = monitorInit(&monitor_reg);
 
     instance->state = STATE_ONLINE;
+	
+	
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    SCB_CleanDCache_by_Addr((uint32_t*)instance, sizeof(Usart_Device_t));
+#endif
     usart_device[id_cnt++] = instance;  // 完成自增
 
     usartStartReceive(instance);  // 注册完成后直接开启接收
@@ -124,6 +129,10 @@ void usartOnDeactivate(void);
 
 Return_t usartSendMessage(Usart_Device_t* instance, uint8_t* message, uint16_t tx_len, Usart_Transfer_Mode mode) {
     Return_t ret;
+
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    SCB_CleanDCache_by_Addr((uint32_t*)message, tx_len);
+#endif
 
     switch (mode) {
         case USART_TRANSFER_DMA:
@@ -161,22 +170,29 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t size) {
             // if it is not NULL
             if (usart_device[i]->rx_buff_num == 2) {
                 usart_device[i]->rx_info.rx_buff_select = DMA_GET_DBM(usart_device[i]->usart_handle->hdmarx);
-                usartDMARestart(usart_device[i]);
-                // 双缓冲区可以重使能DMA，再处理回调
+
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+                // Cache处理
+                if (usart_device[i]->rx_info.rx_buff_select == 0) {
+                    SCB_InvalidateDCache_by_Addr((void*)usart_device[i]->rx_buff, size);
+                } else if (usart_device[i]->rx_info.rx_buff_select == 1) {
+                    SCB_InvalidateDCache_by_Addr((void*)usart_device[i]->rx_buff2, size);
+                }
+#endif
+
                 if (usart_device[i]->usart_device_callback != NULL) {
                     usart_device[i]->rx_info.this_time_rx_len = size;
                     usart_device[i]->usart_device_callback(usart_device[i]);
-                    // 接收结束后清空buffer,对于变长数据是必要的
-                    memset(usart_device[i]->rx_buff, 0, size);
-                    // 如果需要清除，就在回调函数里清除
+                    // 如果需要清除buffer，就在回调函数里清除
                 }
             } else {
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+                SCB_InvalidateDCache_by_Addr((void*)usart_device[i]->rx_buff, size);
+#endif
                 if (usart_device[i]->usart_device_callback != NULL) {
                     usart_device[i]->rx_info.this_time_rx_len = size;
                     usart_device[i]->usart_device_callback(usart_device[i]);
-                    // 接收结束后清空buffer,对于变长数据是必要的
-                    memset(usart_device[i]->rx_buff, 0, size);
-                    // 如果需要清除，就在回调函数里清除
+                    // 如果需要清除buffer，就在回调函数里清除
                 }
                 usartDMARestart(usart_device[i]);
             }

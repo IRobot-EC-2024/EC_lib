@@ -2,7 +2,7 @@
  * @Author       : Specific-Cola specificcola@proton.me
  * @Date         : 2024-03-22 23:03:00
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 13:45:18
+ * @LastEditTime : 2024-04-17 02:47:53
  * @Description  :
  * @Filename     : bsp_pwm.h
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -22,7 +22,7 @@ typedef struct PWM_Device_ {
     float period;                           // 周期   单位毫秒
     float dutyratio;                        // 占空比
     void (*callback)(struct PWM_Device_*);  // DMA传输完成回调函数
-    void* id;                               // 实例ID
+    void* parent;                           // 父实例
 } PWM_Device_t;
 
 typedef struct {
@@ -31,7 +31,7 @@ typedef struct {
     fp32 period;                      // 周期  单位毫秒
     float dutyratio;                  // 占空比
     void (*callback)(PWM_Device_t*);  // DMA传输完成回调函数
-    void* id;                         // 实例ID
+    void* parent;                     // 父实例
 } PWM_Register_t;
 
 PWM_Device_t* pwmRegister(PWM_Register_t* config);

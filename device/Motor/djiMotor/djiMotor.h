@@ -14,8 +14,6 @@
 #define DJIMOTOR_H__
 
 #include "bsp_can.h"
-#include "bsp_dwt.h"
-#include "controller.h"
 #include "main.h"
 #include "struct_typedef.h"
 
@@ -42,9 +40,8 @@ typedef struct {
 } DJI_Command_t;
 
 typedef struct DJI_Motor_ {
-    uint8_t statu;  // online 0  / offline 1
-    DJI_Motor_type_t
-        motor_type;  // 6020   3508   2006   need add pls contact lwt
+    uint8_t statu;                // online 0  / offline 1
+    DJI_Motor_type_t motor_type;  // 6020   3508   2006   need add pls contact lwt
     DJI_Motor_Info_t state_interfaces;
     Can_Device_t* can_info;
     DJI_Command_t command_interfaces;
@@ -54,11 +51,8 @@ typedef struct DJI_Motor_ {
 
 typedef struct {
     DJI_Motor_type_t motor_type;
-#ifdef CAN_DEVICE
-    CAN_HandleTypeDef* can_handle;
-#elif defined(FDCAN_DEVICE)
-    FDCAN_HandleTypeDef* can_handle;
-#endif
+    Can_Handle_t* can_handle;
+
     uint8_t id;
 } DJI_Motor_Register_t;
 

@@ -13,8 +13,8 @@
 #define M2006_MAX_OUTPUT 10000
 #define M2006_MAX_IOUTPUT 5000
 
-// #define MUC1
-#define MUC2
+#define MUC1
+// #define MUC2
 
 // #define HERO1
 // #define HERO1_0

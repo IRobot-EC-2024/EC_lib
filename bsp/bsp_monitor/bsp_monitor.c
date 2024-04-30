@@ -2,7 +2,7 @@
  * @Author       : H0pefu12 573341043@qq.com
  * @Date         : 2024-04-02 19:10:02
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-08 15:37:01
+ * @LastEditTime : 2024-04-15 02:04:34
  * @Description  :
  * @Filename     : bsp_monitor.c
  * @Copyright (c) 2024 by IRobot, All Rights Reserved.
@@ -22,8 +22,7 @@ static uint8_t id_cnt = 0;  // 全局CAN实例索引,每次有新的模块注册
  * @return {*}
  */
 Monitor_Device_t* monitorInit(Monitor_Register_t* monitor_reg) {
-    Monitor_Device_t* monitor_device =
-        (Monitor_Device_t*)malloc(sizeof(Monitor_Device_t));
+    Monitor_Device_t* monitor_device = (Monitor_Device_t*)malloc(sizeof(Monitor_Device_t));
 
     memset(monitor_device, 0, sizeof(Monitor_Device_t));
     monitor_device->device = monitor_reg->device;
@@ -61,19 +60,19 @@ Monitor_Device_Status monitorCounter(Monitor_Device_t* monitor_device) {
     }
 
     if (monitor_device->offline_flag == MONITOR_DEVICE_OFFLINE) {
-		if(monitor_device->offlineCallback!=NULL) {
-			monitor_device->offlineCallback(monitor_device);
-		}
+        if (monitor_device->offlineCallback != NULL) {
+            monitor_device->offlineCallback(monitor_device);
+        }
         return MONITOR_DEVICE_OFFLINE;
     }
 
     monitor_device->offline_counter++;
     if (monitor_device->offline_counter >= monitor_device->offline_threshold) {
         monitor_device->offline_flag = MONITOR_DEVICE_OFFLINE;
-		if(monitor_device->offlineCallback!=NULL) {
-			monitor_device->offlineCallback(monitor_device);
-		}
-		
+        if (monitor_device->offlineCallback != NULL) {
+            monitor_device->offlineCallback(monitor_device);
+        }
+
         return MONITOR_DEVICE_OFFLINE;
     }
 

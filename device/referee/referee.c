@@ -2,7 +2,7 @@
  * @Author       : Specific_Cola specificcola@proton.me
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-13 04:47:33
+ * @LastEditTime : 2024-04-15 02:07:16
  * @Description  :
  * @Filename     : referee.c
  * @
@@ -41,7 +41,6 @@ static void refereeReceiverCallback(Usart_Device_t* usart) {
 static void refereeOfflineCallback(Usart_Device_t* usart) {
     if (usart == NULL || usart->parent == NULL) return;
     Referee_t* referee = (Referee_t*)usart->parent;
-
     referee->state = STATE_OFFLINE;
     memset(&referee->referee_info, 0, sizeof(Referee_info_t));
 }
