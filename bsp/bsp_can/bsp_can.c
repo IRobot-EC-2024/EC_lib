@@ -88,10 +88,7 @@ Can_Device_t* canDeviceRegister(Can_Register_t* reg) {
     canOnDeactivate();
 
     Can_Device_t* instance = (Can_Device_t*)malloc(sizeof(Can_Device_t));  // 分配空间
-    memset(instance, 0,
-           sizeof(Can_Device_t));  // 分配的空间未必是0,所以要先清空
-
-    // 进行发送报文的配置
+    memset(instance, 0, sizeof(Can_Device_t));  // 分配的空间未必是0,所以要先清空
 
     // 进行发送报文的配置
 #if defined(CAN_DEVICE)

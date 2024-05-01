@@ -21,7 +21,6 @@ static uint16_t KeyFormerChannal = 0;
 static uint16_t KeyJumpChannal = 0;
 static uint16_t KeyUsed = 0;
 
-
 // 取正函数
 static int16_t RC_abs(int16_t value) {
     if (value > 0) {
@@ -175,6 +174,15 @@ bool_t SwitchRightDownSide() { return (remote_instance->state_interfaces.rc.s[0]
 bool_t SwitchLeftUpSide() { return (remote_instance->state_interfaces.rc.s[1] == RC_SW_UP); }
 bool_t SwitchLeftMidSide() { return (remote_instance->state_interfaces.rc.s[1] == RC_SW_MID); }
 bool_t SwitchLeftDownSide() { return (remote_instance->state_interfaces.rc.s[1] == RC_SW_DOWN); }
+
+void remoteKeyMouseUpdate(uint16_t key_v, int16_t x, int16_t y, int16_t z, uint8_t press_l, uint8_t press_r) {
+    remote_instance->state_interfaces.key.v = key_v;
+    remote_instance->state_interfaces.mouse.x = x;
+    remote_instance->state_interfaces.mouse.y = y;
+    remote_instance->state_interfaces.mouse.z = z;
+    remote_instance->state_interfaces.mouse.press_l = press_l;
+    remote_instance->state_interfaces.mouse.press_r = press_r;
+}
 
 fp32 NormalizedLimit(fp32 input) {
     if (input > 1.0f) {

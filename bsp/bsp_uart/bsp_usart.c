@@ -105,7 +105,7 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     instance->usart_device_offline_callback = reg->usart_device_offline_callback;
     instance->parent = reg->parent;
 
-    Monitor_Register_t monitor_reg;
+    Monitor_Register_t monitor_reg={};
 
     monitor_reg.device = instance;
     monitor_reg.offlineCallback = usartOfflineCallback;
@@ -128,7 +128,7 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
 void usartOnDeactivate(void);
 
 Return_t usartSendMessage(Usart_Device_t* instance, uint8_t* message, uint16_t tx_len, Usart_Transfer_Mode mode) {
-    Return_t ret;
+    Return_t ret = RETURN_SUCCESS;
 
 #if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
     SCB_CleanDCache_by_Addr((uint32_t*)message, tx_len);
@@ -190,6 +190,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t size) {
                 SCB_InvalidateDCache_by_Addr((void*)usart_device[i]->rx_buff, size);
 #endif
                 if (usart_device[i]->usart_device_callback != NULL) {
+                    usart_device[i]->rx_info.rx_buff_select = 0;
                     usart_device[i]->rx_info.this_time_rx_len = size;
                     usart_device[i]->usart_device_callback(usart_device[i]);
                     // 如果需要清除buffer，就在回调函数里清除

@@ -11,7 +11,7 @@
 #ifndef BUZZER_H__
 #define BUZZER_H__
 
-#include "bsp_pwm.h"
+#include "bsp_pwm/bsp_pwm.h"
 #include "struct_typedef.h"
 
 #define MAX_BUZZER_NUM 1  // 理论上C板应该只有一个蜂鸣器
@@ -37,7 +37,6 @@ void buzzerSeveralTimes(Buzzer_t* buzzer, uint8_t times, uint32_t duration_ms);
 void buzzerSetTune(Buzzer_t* buzzer, uint32_t hz);
 void buzzerSetVolume(Buzzer_t* buzzer, fp32 percent);
 
-void buzzerSetMusicScore(Buzzer_t* buzzer, int16_t* score, uint32_t length,
-                         uint16_t bpm, uint8_t standard);
+void buzzerSetMusicScore(Buzzer_t* buzzer, int16_t* score, uint32_t length, uint16_t bpm, uint8_t standard);
 
 #endif  // !BUZZER_H__

@@ -4,7 +4,6 @@
 
 #include "struct_typedef.h"
 
-#define NULL 0
 #define __FALSE 100
 
 /****************************开始标志*********************/

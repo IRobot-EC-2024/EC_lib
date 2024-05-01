@@ -11,7 +11,7 @@
 #ifndef RM_REMOTE_H__
 #define RM_REMOTE_H__
 
-#include "bsp_usart.h"
+#include "bsp_uart/bsp_usart.h"
 #include "struct_typedef.h"
 
 #define RC_FRAME_LENGTH 18u
@@ -114,4 +114,6 @@ extern bool_t SwitchLeftMidSide();
 extern bool_t SwitchLeftDownSide();
 
 extern fp32 NormalizedLimit(fp32 input);
+
+void remoteKeyMouseUpdate(uint16_t key_v, int16_t x, int16_t y, int16_t z, uint8_t press_l, uint8_t press_r);
 #endif  // !RM_REMOTE_H__

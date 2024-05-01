@@ -11,6 +11,9 @@
 #ifndef BSP_CAN_H__
 #define BSP_CAN_H__
 
+#include "bsp_monitor/bsp_monitor.h"
+#include "struct_typedef.h"
+
 #if defined(STM32F407xx) || defined(STM32F427xx)
 #define CAN_DEVICE
 #define CAN_HANDLE1 hcan1
@@ -22,16 +25,13 @@
 #define CAN_HANDLE3 hfdcan3
 #endif
 
-#ifdef CAN_DEVICE
+#ifdef HAL_CAN_MODULE_ENABLED
 #include "can.h"
 typedef CAN_HandleTypeDef Can_Handle_t;
-#elif defined(FDCAN_DEVICE)
+#elif defined(HAL_FDCAN_MODULE_ENABLED)
 #include "fdcan.h"
 typedef FDCAN_HandleTypeDef Can_Handle_t;
 #endif
-
-#include "bsp_monitor.h"
-#include "struct_typedef.h"
 
 #define CAN_MX_REGISTER_CNT 40
 
