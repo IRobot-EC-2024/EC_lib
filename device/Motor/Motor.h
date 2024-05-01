@@ -97,6 +97,7 @@ typedef struct {
         DJI_Motor_Register_t dji_motor_set;
         DM_Motor_Register_t dm_motor_set;
         RMD_Motor_Register_t rmd_motor_set;
+        Motor_Register_Common_t motor_register_common;
     };
 } Motor_Register_t;
 

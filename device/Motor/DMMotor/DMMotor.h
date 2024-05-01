@@ -61,6 +61,8 @@ typedef struct DM_Motor_ {
 } DM_Motor_t;
 
 typedef struct {
+    Motor_Register_Common_t motor_register_common;
+
     Can_Handle_t* can_handle;
     uint16_t rx_id;
     uint16_t tx_id;
@@ -72,8 +74,6 @@ typedef struct {
     fp32 kd_max;
     fp32 kp_min;
     fp32 kd_min;
-
-    Motor_Register_Common_t motor_register_common;
 } DM_Motor_Register_t;
 
 DM_Motor_t* dmMotorAdd(DM_Motor_Register_t* reg);

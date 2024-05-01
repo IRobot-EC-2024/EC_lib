@@ -65,6 +65,7 @@ DM_Motor_t* dmMotorAdd(DM_Motor_Register_t* reg) {
     can_reg.tx_id = reg->tx_id;
     can_reg.rx_id = reg->rx_id;
     can_reg.parent = motor;
+    can_reg.offline_threshold = MOTOR_OFFLINE_THRESHOLD;
 
     motor->motor_common.motor_type = reg->motor_register_common.motor_type;
     motor->p_max = reg->p_max;

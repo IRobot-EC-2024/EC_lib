@@ -58,6 +58,7 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
             break;
     }
     can_reg.parent = motor;
+    can_reg.offline_threshold = MOTOR_OFFLINE_THRESHOLD;
 
     motor->motor_common.motor_type = reg->motor_register_common.motor_type;
     motor->can_info = canDeviceRegister(&can_reg);

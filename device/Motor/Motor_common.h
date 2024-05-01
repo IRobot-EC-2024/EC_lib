@@ -14,6 +14,8 @@
 #include "bsp_can/bsp_can.h"
 #include "struct_typedef.h"
 
+#define MOTOR_OFFLINE_THRESHOLD 50  // ms
+
 typedef enum {
     DJI_MOTOR_MASK = 0x10,
     DJI_MOTOR_6020 = 0x11,

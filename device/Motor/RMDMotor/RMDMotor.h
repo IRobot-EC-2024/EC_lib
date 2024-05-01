@@ -42,10 +42,10 @@ typedef struct RMD_Motor_ {
 } RMD_Motor_t;
 
 typedef struct {
+    Motor_Register_Common_t motor_register_common;
+
     Can_Handle_t* can_handle;
     uint8_t id;
-
-    Motor_Register_Common_t motor_register_common;
 } RMD_Motor_Register_t;
 
 RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg);

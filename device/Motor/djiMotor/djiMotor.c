@@ -56,7 +56,7 @@ DJI_Motor_t* djiMotorAdd(DJI_Motor_Register_t* reg) {
     can_reg.tx_dlc = 8;
     can_reg.can_device_callback = djiMotorCallback;
     can_reg.can_device_offline_callback = reg->motor_register_common.motorOfflineCallback;
-    can_reg.offline_threshold = 50;
+    can_reg.offline_threshold = MOTOR_OFFLINE_THRESHOLD;
     can_reg.parent = motor;
 
     switch (reg->motor_register_common.motor_type) {

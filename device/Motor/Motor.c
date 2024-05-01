@@ -35,10 +35,11 @@ Motor_t* motorAdd(Motor_Register_t* reg) {
     if (motor == NULL) return NULL;
     memset(motor, 0, sizeof(Motor_t));
 
+    reg->motor_register_common.motor_type = reg->motor_type;
+    reg->motor_register_common.motorOfflineCallback = motorOfflineCallback;
+
     switch (motor_mask) {
         case DJI_MOTOR_MASK: {
-            reg->dji_motor_set.motor_register_common.motor_type = reg->motor_type;
-            reg->dji_motor_set.motor_register_common.motorOfflineCallback = motorOfflineCallback;
             motor->dji = djiMotorAdd(&reg->dji_motor_set);
             motor->dji->motorCallback = djiMotorInfo;
         } break;

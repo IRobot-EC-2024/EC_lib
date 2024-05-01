@@ -44,10 +44,11 @@ typedef struct DJI_Motor_ {
 } DJI_Motor_t;
 
 typedef struct {
+    Motor_Register_Common_t motor_register_common;
+
     Can_Handle_t* can_handle;
     uint8_t id;
 
-    Motor_Register_Common_t motor_register_common;
 } DJI_Motor_Register_t;
 
 DJI_Motor_t* djiMotorAdd(DJI_Motor_Register_t* reg);
