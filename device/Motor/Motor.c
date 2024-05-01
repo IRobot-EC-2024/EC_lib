@@ -20,25 +20,25 @@
 static Motor_t* motor_instance[MAX_MOTOR_NUM];
 static uint8_t id_cnt = 0;  // 记录电机数量
 
-#define get_motor_mask(indicator) ((indicator)->motor_type & 0xFFF0)
+#define get_motor_mask(indicator) ((indicator)->motor_common->motor_type & 0xFFF0)
 
 /***                        添加电机种类时必须修改的部分START ***/
-static void djiMotorInfo(DJI_Motor_t* motor);
-static void dmMotorInfo(DM_Motor_t* motor);
-static void rmdMotorInfo(RMD_Motor_t* motor);
+static void djiMotorInfo(const DJI_Motor_t* motor);
+static void dmMotorInfo(const DM_Motor_t* motor);
+static void rmdMotorInfo(const RMD_Motor_t* motor);
+static void motorOfflineCallback(Can_Device_t* can_device);
 
 Motor_t* motorAdd(Motor_Register_t* reg) {
-    uint16_t motor_mask;
-    motor_mask = get_motor_mask(reg);
+    uint16_t motor_mask = (reg->motor_type & 0xFFF0);
 
     Motor_t* motor = (Motor_t*)malloc(sizeof(Motor_t));
-
-    if (motor == NULL) {
-        return NULL;
-    }
+    if (motor == NULL) return NULL;
+    memset(motor, 0, sizeof(Motor_t));
 
     switch (motor_mask) {
         case DJI_MOTOR_MASK: {
+            reg->dji_motor_set.motor_register_common.motor_type = reg->motor_type;
+            reg->dji_motor_set.motor_register_common.motorOfflineCallback = motorOfflineCallback;
             motor->dji = djiMotorAdd(&reg->dji_motor_set);
             motor->dji->motorCallback = djiMotorInfo;
         } break;
@@ -52,10 +52,13 @@ Motor_t* motorAdd(Motor_Register_t* reg) {
             motor->rmd = rmdMotorAdd(&reg->rmd_motor_set);
             motor->rmd->motorCallback = rmdMotorInfo;
         } break;
+        default: {
+        } break;
     }
-    motor->statu = 0;
-    motor->motor_type = reg->motor_type;
-    motor_instance[id_cnt++] = motor;
+
+    motor->motor_common->common = motor;
+    motor_instance[id_cnt] = motor;
+    id_cnt++;
 
     return motor;
 }
@@ -215,31 +218,27 @@ void motor_SwitchRing(Motor_t* motor, Position_Controller_t* controller) {
  * @param {DJI_Motor_t*} motor
  * @return {*}
  */
-static void djiMotorInfo(DJI_Motor_t* motor) {
-    uint8_t i = 0;
-    for (i = 0; i < id_cnt; i++) {
-        if (motor_instance[i]->dji == motor) {
-            motor_instance[i]->state_interfaces.last_angle = motor_instance[i]->state_interfaces.angle;
-            motor_instance[i]->state_interfaces.angle = motor->state_interfaces.ecd / 8191.0 * 360;
-            motor_instance[i]->state_interfaces.current = motor->state_interfaces.given_current;
-            motor_instance[i]->state_interfaces.speed_rpm = motor->state_interfaces.speed_rpm;
-            motor_instance[i]->state_interfaces.temperate = motor->state_interfaces.temperate;
-            motor_instance[i]->state_interfaces.torque = 0;
+static void djiMotorInfo(const DJI_Motor_t* motor) {
+    if (motor == NULL || motor->motor_common.common == NULL) return;
 
-            // 转速不可高于45000rpm
-            if ((motor_instance[i]->state_interfaces.angle - motor_instance[i]->state_interfaces.last_angle) > 270) {
-                motor_instance[i]->state_interfaces.rounds--;
-            } else if ((motor_instance[i]->state_interfaces.angle - motor_instance[i]->state_interfaces.last_angle) <
-                       -270) {
-                motor_instance[i]->state_interfaces.rounds++;
-            }
+    Motor_t* instance = motor->motor_common.common;
 
-            motor_instance[i]->state_interfaces.series_angle =
-                motor_instance[i]->state_interfaces.angle + 360 * motor_instance[i]->state_interfaces.rounds;
+    instance->state_interfaces.last_angle = instance->state_interfaces.angle;
+    instance->state_interfaces.angle = motor->state_interfaces.ecd / 8191.0 * 360;
+    instance->state_interfaces.current = motor->state_interfaces.given_current;
+    instance->state_interfaces.speed_rpm = motor->state_interfaces.speed_rpm;
+    instance->state_interfaces.temperate = motor->state_interfaces.temperate;
+    instance->state_interfaces.torque = 0;
 
-            break;
-        }
+    // 转速不可高于45000rpm
+    if ((instance->state_interfaces.angle - instance->state_interfaces.last_angle) > 180) {
+        instance->state_interfaces.rounds--;
+    } else if ((instance->state_interfaces.angle - instance->state_interfaces.last_angle) < -180) {
+        instance->state_interfaces.rounds++;
     }
+
+    instance->state_interfaces.series_angle =
+        instance->state_interfaces.angle + 360 * instance->state_interfaces.rounds;
 }
 
 /**
@@ -247,32 +246,26 @@ static void djiMotorInfo(DJI_Motor_t* motor) {
  * @param {DM_Motor_t*} motor
  * @return {*}
  */
-static void dmMotorInfo(DM_Motor_t* motor) {
-    uint8_t i = 0;
-    for (i = 0; i < id_cnt; i++) {
-        if (motor_instance[i]->dm == motor) {
-            motor_instance[i]->state_interfaces.last_angle = motor_instance[i]->state_interfaces.angle;
-            motor_instance[i]->state_interfaces.angle =
-                loop_float_constrain(motor->state_interfaces.position / PI * 180, 0, 360);
+static void dmMotorInfo(const DM_Motor_t* motor) {
+    if (motor == NULL || motor->motor_common.common == NULL) return;
 
-            motor_instance[i]->state_interfaces.current = 0;
-            motor_instance[i]->state_interfaces.speed_rpm = motor->state_interfaces.velocity / PI * 60;
-            motor_instance[i]->state_interfaces.temperate = motor->state_interfaces.t_mos;
-            motor_instance[i]->state_interfaces.torque = motor->state_interfaces.torque;
+    Motor_t* instance = motor->motor_common.common;
+    instance->state_interfaces.last_angle = instance->state_interfaces.angle;
+    instance->state_interfaces.angle = loop_float_constrain(motor->state_interfaces.position / PI * 180, 0, 360);
 
-            if ((motor_instance[i]->state_interfaces.angle - motor_instance[i]->state_interfaces.last_angle) > 270) {
-                motor_instance[i]->state_interfaces.rounds--;
-            } else if ((motor_instance[i]->state_interfaces.angle - motor_instance[i]->state_interfaces.last_angle) <
-                       -270) {
-                motor_instance[i]->state_interfaces.rounds++;
-            }
+    instance->state_interfaces.current = 0;
+    instance->state_interfaces.speed_rpm = motor->state_interfaces.velocity / PI * 60;
+    instance->state_interfaces.temperate = motor->state_interfaces.t_mos;
+    instance->state_interfaces.torque = motor->state_interfaces.torque;
 
-            motor_instance[i]->state_interfaces.series_angle =
-                motor_instance[i]->state_interfaces.angle + 360 * motor_instance[i]->state_interfaces.rounds;
-
-            break;
-        }
+    if ((instance->state_interfaces.angle - instance->state_interfaces.last_angle) > 180) {
+        instance->state_interfaces.rounds--;
+    } else if ((instance->state_interfaces.angle - instance->state_interfaces.last_angle) < -180) {
+        instance->state_interfaces.rounds++;
     }
+
+    instance->state_interfaces.series_angle =
+        instance->state_interfaces.angle + 360 * instance->state_interfaces.rounds;
 }
 
 /**
@@ -280,31 +273,34 @@ static void dmMotorInfo(DM_Motor_t* motor) {
  * @param {RMD_Motor_t*} motor
  * @return {*}
  */
-static void rmdMotorInfo(RMD_Motor_t* motor) {
-    uint8_t i = 0;
-    for (i = 0; i < id_cnt; i++) {
-        if (motor_instance[i]->rmd == motor) {
-            motor_instance[i]->state_interfaces.last_angle = motor_instance[i]->state_interfaces.angle;
-            motor_instance[i]->state_interfaces.angle =
-                loop_float_constrain(motor->state_interfaces.encoder / 16383.0 * 360, 0, 360);
+static void rmdMotorInfo(const RMD_Motor_t* motor) {
+    if (motor == NULL || motor->motor_common.common == NULL) return;
 
-            motor_instance[i]->state_interfaces.current = motor->state_interfaces.iq / 2000.0 * 32;
-            motor_instance[i]->state_interfaces.speed_rpm = motor->state_interfaces.speed / PI * 60;
-            motor_instance[i]->state_interfaces.temperate = motor->state_interfaces.temperature;
+    Motor_t* instance = motor->motor_common.common;
+    instance->state_interfaces.last_angle = instance->state_interfaces.angle;
+    instance->state_interfaces.angle = loop_float_constrain(motor->state_interfaces.encoder / 16383.0 * 360, 0, 360);
 
-            if ((motor_instance[i]->state_interfaces.angle - motor_instance[i]->state_interfaces.last_angle) > 270) {
-                motor_instance[i]->state_interfaces.rounds--;
-            } else if ((motor_instance[i]->state_interfaces.angle - motor_instance[i]->state_interfaces.last_angle) <
-                       -270) {
-                motor_instance[i]->state_interfaces.rounds++;
-            }
+    instance->state_interfaces.current = motor->state_interfaces.iq / 2000.0 * 32;
+    instance->state_interfaces.speed_rpm = motor->state_interfaces.speed / PI * 60;
+    instance->state_interfaces.temperate = motor->state_interfaces.temperature;
 
-            motor_instance[i]->state_interfaces.series_angle =
-                motor_instance[i]->state_interfaces.angle + 360 * motor_instance[i]->state_interfaces.rounds;
-
-            break;
-        }
+    if ((instance->state_interfaces.angle - instance->state_interfaces.last_angle) > 180) {
+        instance->state_interfaces.rounds--;
+    } else if ((instance->state_interfaces.angle - instance->state_interfaces.last_angle) < -180) {
+        instance->state_interfaces.rounds++;
     }
+
+    instance->state_interfaces.series_angle =
+        instance->state_interfaces.angle + 360 * instance->state_interfaces.rounds;
+}
+
+static void motorOfflineCallback(Can_Device_t* can_device) {
+    if (can_device == NULL || can_device->parent == NULL) return;
+    Motor_t* motor = ((Motor_Common_t*)can_device->parent)->common;
+    if (motor == NULL) return;
+    motor->motor_common->statu = STATE_OFFLINE;
+    memset(&motor->state_interfaces, 0, sizeof(Motor_Info_t));
+    memset(&motor->command_interfaces, 0, sizeof(Motor_Common_t));
 }
 
 bool_t motorBlockJudgment(Motor_t* motor, float speed_upper_limit) {

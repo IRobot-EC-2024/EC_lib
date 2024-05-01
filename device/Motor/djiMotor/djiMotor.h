@@ -13,19 +13,13 @@
 #ifndef DJIMOTOR_H__
 #define DJIMOTOR_H__
 
-#include "bsp_can.h"
+#include "Motor/Motor_common.h"
+#include "bsp_can/bsp_can.h"
 #include "main.h"
 #include "struct_typedef.h"
 
-#define MAX_DJI_MOTOR_NUM 14  // 姑且算一个can7个电机
+#define MAX_DJI_MOTOR_NUM 21  // 姑且算一个can7个电机
 #define OFFLINE_TIME_MAX 0.1  // 单位s
-typedef enum {
-    DJI_MOTOR_MASK = 0x10,
-    DJI_MOTOR_6020 = 0x11,
-    DJI_MOTOR_3508 = 0x12,
-    DJI_MOTOR_2006 = 0x13,
-
-} DJI_Motor_type_t;
 
 typedef struct {
     uint16_t ecd;
@@ -40,20 +34,20 @@ typedef struct {
 } DJI_Command_t;
 
 typedef struct DJI_Motor_ {
-    uint8_t statu;                // online 0  / offline 1
-    DJI_Motor_type_t motor_type;  // 6020   3508   2006   need add pls contact lwt
+    Motor_Common_t motor_common;
+
     DJI_Motor_Info_t state_interfaces;
     Can_Device_t* can_info;
     DJI_Command_t command_interfaces;
 
-    void (*motorCallback)(struct DJI_Motor_*);
+    void (*motorCallback)(const struct DJI_Motor_*);
 } DJI_Motor_t;
 
 typedef struct {
-    DJI_Motor_type_t motor_type;
     Can_Handle_t* can_handle;
-
     uint8_t id;
+
+    Motor_Register_Common_t motor_register_common;
 } DJI_Motor_Register_t;
 
 DJI_Motor_t* djiMotorAdd(DJI_Motor_Register_t* reg);

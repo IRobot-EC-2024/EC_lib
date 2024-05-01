@@ -64,7 +64,7 @@ Return_t servoMotorSendMessage(Servo_Motor_t* motor) {
                     (motor->dutyratio_max - motor->dutyratio_min) +
                 motor->dutyratio_min;
 
-    pwmSetDuty(motor->pwm_info, 1-dutyratio);
+    pwmSetDuty(motor->pwm_info, 1 - dutyratio);
     return RETURN_SUCCESS;
 }
 

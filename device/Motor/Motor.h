@@ -11,15 +11,16 @@
 #ifndef MOTOR_H__
 #define MOTOR_H__
 
-#include "controller.h"
+#include "Motor/Motor_common.h"
+#include "PID/controller.h"
 #include "main.h"
 #include "struct_typedef.h"
 
 // 电机小类头
-#include "DMMotor.h"
-#include "RMDMotor.h"
-#include "ServoMotor.h"
-#include "djiMotor.h"
+#include "Motor/DMMotor/DMMotor.h"
+#include "Motor/RMDMotor/RMDMotor.h"
+#include "Motor/ServoMotor/ServoMotor.h"
+#include "Motor/djiMotor/djiMotor.h"
 
 #define MAX_MOTOR_NUM 30      //
 #define OFFLINE_TIME_MAX 0.1  // 单位s
@@ -76,9 +77,6 @@ typedef struct {
 } Motor_Command_t;
 
 typedef struct {
-    uint8_t statu;  // online 0  / offline 1
-    uint8_t motor_type;
-
     Motor_Control_Mode_t control_mode;
 
     Motor_Info_t state_interfaces;
@@ -89,15 +87,16 @@ typedef struct {
         DJI_Motor_t* dji;
         DM_Motor_t* dm;
         RMD_Motor_t* rmd;
+        Motor_Common_t* motor_common;
     };
 } Motor_t;
 
-typedef union {
-    DJI_Motor_Register_t dji_motor_set;
-    DM_Motor_Register_t dm_motor_set;
-    RMD_Motor_Register_t rmd_motor_set;
-    struct {
-        uint32_t motor_type;
+typedef struct {
+    Motor_Type_t motor_type;
+    union {
+        DJI_Motor_Register_t dji_motor_set;
+        DM_Motor_Register_t dm_motor_set;
+        RMD_Motor_Register_t rmd_motor_set;
     };
 } Motor_Register_t;
 

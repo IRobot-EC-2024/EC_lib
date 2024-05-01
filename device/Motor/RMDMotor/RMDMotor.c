@@ -31,7 +31,7 @@ static void rmdMotorCallback(Can_Device_t* can_device) {
     if (motor->motorCallback != NULL) {
         motor->motorCallback(motor);
     }
-    motor->statu = STATE_ONLINE;
+    motor->motor_common.statu = STATE_ONLINE;
 }
 
 RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
@@ -47,7 +47,8 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
     can_reg.can_handle = reg->can_handle;
     can_reg.tx_dlc = 8;
     can_reg.can_device_callback = rmdMotorCallback;
-    switch (reg->motor_type) {
+    can_reg.can_device_offline_callback = reg->motor_register_common.motorOfflineCallback;
+    switch (reg->motor_register_common.motor_type) {
         case RMD_MOTOR_4015:
             can_reg.rx_id = 0x140 + reg->id;
             can_reg.tx_id = 0x140 + reg->id;
@@ -58,7 +59,7 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
     }
     can_reg.parent = motor;
 
-    motor->motor_type = reg->motor_type;
+    motor->motor_common.motor_type = reg->motor_register_common.motor_type;
     motor->can_info = canDeviceRegister(&can_reg);
 
     rmd_motor[id_cnt++] = motor;
@@ -67,9 +68,8 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
 }
 
 Return_t rmdMotorSendMessage(RMD_Motor_t* motor) {
-    if (motor->statu == STATE_OFFLINE) {
-        memset(&motor->command_interfaces, 0,
-               sizeof(motor->command_interfaces));
+    if (motor->motor_common.statu == STATE_OFFLINE) {
+        memset(&motor->command_interfaces, 0, sizeof(motor->command_interfaces));
         return RETURN_ERROR;
     }
 
@@ -78,8 +78,7 @@ Return_t rmdMotorSendMessage(RMD_Motor_t* motor) {
     motor_send_buffer[2] = 0;
     motor_send_buffer[3] = 0;
     motor_send_buffer[4] = *(uint8_t*)(&motor->command_interfaces.iqControl);
-    motor_send_buffer[5] =
-        *((uint8_t*)(&motor->command_interfaces.iqControl) + 1);
+    motor_send_buffer[5] = *((uint8_t*)(&motor->command_interfaces.iqControl) + 1);
     motor_send_buffer[6] = 0;
     motor_send_buffer[7] = 0;
 
@@ -100,10 +99,8 @@ void rmdMotorInfoUpdate(RMD_Motor_t* motor, uint8_t* data) {
         case 0xA8: {
             motor->state_interfaces.temperature = (data)[1];
             motor->state_interfaces.iq = (uint16_t)((data)[3] << 8 | (data)[2]);
-            motor->state_interfaces.speed =
-                (uint16_t)((data)[5] << 8 | (data)[4]);
-            motor->state_interfaces.encoder =
-                (uint16_t)((data)[7] << 8 | (data)[6]);
+            motor->state_interfaces.speed = (uint16_t)((data)[5] << 8 | (data)[4]);
+            motor->state_interfaces.encoder = (uint16_t)((data)[7] << 8 | (data)[6]);
         } break;
     }
 }
