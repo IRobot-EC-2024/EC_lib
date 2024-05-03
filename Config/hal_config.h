@@ -10,6 +10,7 @@
 #include "stm32f4xx_hal.h"
 #elif defined(STM32H723xx)
 #include "stm32h7xx_hal.h"
+#include "stm32h7xx.h"
 #else
 #error "No supported chip defined"
 #endif

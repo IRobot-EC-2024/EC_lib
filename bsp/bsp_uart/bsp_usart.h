@@ -10,7 +10,8 @@
 #ifndef BSP_USART_H__
 #define BSP_USART_H__
 
-#include "bsp_monitor.h"
+#include "bsp_monitor/bsp_monitor.h"
+#include "hal_config.h"
 #include "struct_typedef.h"
 #include "usart.h"
 

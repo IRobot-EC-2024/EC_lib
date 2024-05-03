@@ -2,7 +2,7 @@
  * @Author       : Specific_Cola specificcola@proton.me
  * @Date         : 2024-04-08 12:12:57
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-15 02:07:16
+ * @LastEditTime : 2024-04-26 17:05:53
  * @Description  :
  * @Filename     : referee.c
  * @
@@ -18,6 +18,10 @@
 
 #define Robot_ID UI_Data_RobotID_BEngineer
 #define Cilent_ID UI_Data_CilentID_BEngineer  // 机器人角色设置
+
+fp32 test_det_t = 0;
+fp32 max_det_t = 0;
+fp32 avr_det_t = 0;
 
 static Referee_t* referee_instance;
 
@@ -51,7 +55,7 @@ Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* hu
     Referee_t* referee = (Referee_t*)malloc(sizeof(Referee_t));
     memset(referee, 0, sizeof(Referee_t));
 
-    Usart_Register_t usart_reg;
+    Usart_Register_t usart_reg={};
 
     if (huart1 != NULL) {
         memset(&usart_reg, 0, sizeof(Usart_Register_t));
@@ -71,7 +75,7 @@ Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* hu
     if (huart2 != NULL) {
         memset(&usart_reg, 0, sizeof(Usart_Register_t));
         usart_reg.usart_handle = huart2;
-        usart_reg.rx_buff_num = 1;
+        usart_reg.rx_buff_num = 2;
         usart_reg.rx_len = 256;
         usart_reg.usart_device_callback = refereeReceiverCallback;
         usart_reg.usart_device_offline_callback = refereeOfflineCallback;
@@ -89,7 +93,7 @@ Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* hu
 
 Referee_t* refereeReceiverGet() { return referee_instance; }
 
-void referee_data_solve(uint8_t* frame) {
+uint16_t referee_data_solve(uint8_t* frame) {
     uint16_t cmd_id = 0;
 
     uint8_t index = 0;
@@ -196,6 +200,7 @@ void referee_data_solve(uint8_t* frame) {
             break;
         }
     }
+    return cmd_id;
 }
 
 /**
@@ -203,7 +208,7 @@ void referee_data_solve(uint8_t* frame) {
  * @param[in]      void
  * @retval         none
  */
-void referee_unpack_fifo_data(void) {
+uint16_t referee_unpack_fifo_data(void) {
     uint8_t byte = 0;
     uint8_t sof = HEADER_SOF;
     unpack_data_t* p_obj = &referee_instance->referee_unpack_obj;
@@ -264,7 +269,7 @@ void referee_unpack_fifo_data(void) {
                     p_obj->index = 0;
 
                     if (crc_16(p_obj->protocol_packet, REF_HEADER_CRC_CMDID_LEN + p_obj->data_len)) {
-                        referee_data_solve(p_obj->protocol_packet);
+                        return referee_data_solve(p_obj->protocol_packet);
                     }
                 }
             } break;
@@ -275,6 +280,7 @@ void referee_unpack_fifo_data(void) {
             } break;
         }
     }
+	return 0;
 }
 
 // 裁判系统通信发送

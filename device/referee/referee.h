@@ -2,7 +2,7 @@
  * @Author       : Specific_Cola specificcola@proton.me
  * @Date         : 2024-04-07 00:48:03
  * @LastEditors  : H0pefu12 573341043@qq.com
- * @LastEditTime : 2024-04-15 02:07:35
+ * @LastEditTime : 2024-04-26 17:07:52
  * @Description  :
  * @Filename     : referee.h
  * @
@@ -11,10 +11,10 @@
 #define REFEREE_RECEIVER_H__
 
 #include "Client_UI.h"
-#include "bsp_usart.h"
-#include "crc16.h"
-#include "crc8.h"
-#include "fifo.h"
+#include "bsp_uart/bsp_usart.h"
+#include "crc/crc16.h"
+#include "crc/crc8.h"
+#include "fifo/fifo.h"
 #include "referee_info.h"
 
 typedef struct {
@@ -72,7 +72,8 @@ typedef struct {
 } Referee_t;
 
 Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* huart2);
-void referee_data_solve(uint8_t* frame);
+uint16_t referee_data_solve(uint8_t* frame);
+uint16_t referee_unpack_fifo_data(void);
 Referee_t* refereeReceiverGet(void);
 
 void refereeInteractionPush(robot_interaction_data_t* interaction_data, uint8_t user_data_length);

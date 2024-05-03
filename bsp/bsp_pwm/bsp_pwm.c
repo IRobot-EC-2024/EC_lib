@@ -79,8 +79,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef* htim) {
         }
     }
 }
-void PWMStartDMA(PWM_Device_t* pwm, uint32_t* pData,
-                 uint32_t Size)  // 一般使用用来点亮ws2812灯带
+void PWMStartDMA(PWM_Device_t* pwm, uint32_t* pData, uint32_t Size)  // 一般使用用来点亮ws2812灯带
 {
     HAL_TIM_PWM_Start_DMA(pwm->htim, pwm->channel, pData, Size);
 }

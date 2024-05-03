@@ -14,11 +14,11 @@
 #include <string.h>
 
 #include "Buzzer_def.h"
-#include "bsp_delay.h"
+#include "bsp_delay/bsp_delay.h"
 #include "main.h"
 
 static Buzzer_t* buzzer_instance[MAX_BUZZER_NUM];
-static uint8_t id_cnt = 0;  // 记录电机数量
+static uint8_t id_cnt = 0;
 
 const uint16_t buzzer_frequency[] = {
     131,  // 倍低1
@@ -89,26 +89,28 @@ const uint16_t buzzer_frequency[] = {
 
 Buzzer_t* buzzerInit(Buzzer_Register_t* reg) {
     Buzzer_t* instance = (Buzzer_t*)malloc(sizeof(Buzzer_t));
+    memset(instance, 0, sizeof(Buzzer_t));
 
     PWM_Register_t pwm_reg;
     pwm_reg.htim = reg->htim;
     pwm_reg.channel = reg->channel;
     pwm_reg.dutyratio = 0.5;
-    pwm_reg.period =
-        1000.0 / buzzer_frequency[BUZZER_C_MAJOR_OFFSET + BUZZER_SI_OFFSET];
+    pwm_reg.period = 1000.0 / buzzer_frequency[BUZZER_C_MAJOR_OFFSET + BUZZER_SI_OFFSET];
     pwm_reg.callback = NULL;
     instance->pwm = pwmRegister(&pwm_reg);
     instance->volume = 0.5;
     pwmOnDeactivate(instance->pwm);
+
+    delayInit();
+
     buzzer_instance[id_cnt++] = instance;
     return instance;
 }
 
 void buzzerOnce(Buzzer_t* buzzer) {
     pwmOnActivate(buzzer->pwm);
-    delayMs(50);
+    delayMs(100);
     pwmOnDeactivate(buzzer->pwm);
-    delayMs(50);
 }
 
 void buzzerSeveralTimes(Buzzer_t* buzzer, uint8_t times, uint32_t duration_ms) {
@@ -124,9 +126,7 @@ void buzzerSeveralTimes(Buzzer_t* buzzer, uint8_t times, uint32_t duration_ms) {
     }
 }
 
-void buzzerSetTune(Buzzer_t* buzzer, uint32_t hz) {
-    pwmSetPeriod(buzzer->pwm, 1000.0 * hz);
-}
+void buzzerSetTune(Buzzer_t* buzzer, uint32_t hz) { pwmSetPeriod(buzzer->pwm, 1000.0 * hz); }
 
 void buzzerSetVolume(Buzzer_t* buzzer, fp32 percent) {
     if (percent > 1) {
@@ -139,8 +139,7 @@ void buzzerSetVolume(Buzzer_t* buzzer, fp32 percent) {
     pwmSetDuty(buzzer->pwm, 0.5 * buzzer->volume);
 }
 
-void buzzerSetMusicScore(Buzzer_t* buzzer, int16_t* score, uint32_t length,
-                         uint16_t bpm, uint8_t standard) {
+void buzzerSetMusicScore(Buzzer_t* buzzer, int16_t* score, uint32_t length, uint16_t bpm, uint8_t standard) {
     fp32 beat_ms = 60000.0 / bpm;
     fp32 buzzer_ms = 0;
     fp32 this_beat_ms = 0;
@@ -150,8 +149,7 @@ void buzzerSetMusicScore(Buzzer_t* buzzer, int16_t* score, uint32_t length,
         if (score[i << 1] == BUZZER_GAP) {
             pwmSetDuty(buzzer->pwm, 0);
         } else {
-            pwmSetPeriod(buzzer->pwm,
-                         1000.0 / buzzer_frequency[standard + score[i << 1]]);
+            pwmSetPeriod(buzzer->pwm, 1000.0 / buzzer_frequency[standard + score[i << 1]]);
             pwmSetDuty(buzzer->pwm, 0.5 * buzzer->volume);
         }
 

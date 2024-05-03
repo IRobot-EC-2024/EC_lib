@@ -13,7 +13,7 @@
 
 #include "struct_typedef.h"
 
-#define MONITOR_DEVICE_NUM 20
+#define MONITOR_DEVICE_NUM 40
 
 typedef enum {
     MONITOR_DEVICE_ONLINE = 0,

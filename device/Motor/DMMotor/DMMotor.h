@@ -11,18 +11,13 @@
 #ifndef DMMOTOR_H__
 #define DMMOTOR_H__
 
-#include "bsp_can.h"
-#include "controller.h"
+#include "Motor/Motor_common.h"
+#include "bsp_can/bsp_can.h"
 #include "main.h"
 #include "struct_typedef.h"
 
 #define MAX_DM_MOTOR_NUM 5
 #define OFFLINE_TIME_MAX 0.1  // 单位s
-typedef enum {
-    DM_MOTOR_MASK = 0x20,
-    DM_MOTOR_4310 = 0x21,
-
-} DM_Motor_type_t;
 
 typedef struct {
     uint8_t id;
@@ -48,13 +43,13 @@ typedef struct {
 } DM_MIT_Command_t;
 
 typedef struct DM_Motor_ {
-    uint8_t statu;               // online 0  / offline 1
-    DM_Motor_type_t motor_type;  // 6020   3508   2006   need add pls contact lwt
+    Motor_Common_t motor_common;
+
     DM_Motor_Info_t state_interfaces;
     Can_Device_t* can_info;
     DM_MIT_Command_t command_interfaces;
 
-    void (*motorCallback)(struct DM_Motor_*);
+    void (*motorCallback)(const struct DM_Motor_*);
 
     fp32 p_max;
     fp32 v_max;
@@ -66,7 +61,8 @@ typedef struct DM_Motor_ {
 } DM_Motor_t;
 
 typedef struct {
-    DM_Motor_type_t motor_type;
+    Motor_Register_Common_t motor_register_common;
+
     Can_Handle_t* can_handle;
     uint16_t rx_id;
     uint16_t tx_id;
@@ -78,13 +74,12 @@ typedef struct {
     fp32 kd_max;
     fp32 kp_min;
     fp32 kd_min;
-
 } DM_Motor_Register_t;
 
 DM_Motor_t* dmMotorAdd(DM_Motor_Register_t* reg);
 void dmMotorDelete(DM_Motor_t* motor);
 void dmMotorInfoUpdate(DM_Motor_t* motor, uint8_t* data);
-void dmMotorEnable(DM_Motor_t* motor);
+Return_t dmMotorEnable(DM_Motor_t* motor);
 void dmMotorDisable(DM_Motor_t* motor);
 void dmMotorSetZero(DM_Motor_t* motor);
 void dmMotorClearError(DM_Motor_t* motor);

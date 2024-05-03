@@ -30,22 +30,16 @@ static uint8_t MotorSendBuffer_can3[24];
 static uint32_t send_mail_box_can1;
 static uint32_t send_mail_box_can2;
 
-static void djiMotorOfflineCallback(Can_Device_t* can_device) {
-    if (can_device == NULL) return;
-    DJI_Motor_t* motor = can_device->parent;
-    motor->statu = STATE_OFFLINE;
-}
-
 static void djiMotorCallback(Can_Device_t* can_device) {
     if (can_device == NULL) return;
 
     DJI_Motor_t* motor = can_device->parent;
     djiMotorInfoUpdate(motor, can_device->rx_buff);
 
+    motor->motor_common.statu = STATE_ONLINE;
     if (motor->motorCallback != NULL) {
         motor->motorCallback(motor);
     }
-    motor->statu = STATE_ONLINE;
 }
 
 DJI_Motor_t* djiMotorAdd(DJI_Motor_Register_t* reg) {
@@ -54,19 +48,18 @@ DJI_Motor_t* djiMotorAdd(DJI_Motor_Register_t* reg) {
         Error_Handler();  // 电机太多了
     }
 
-    Can_Register_t can_reg;
+    Can_Register_t can_reg = {};
     DJI_Motor_t* motor = (DJI_Motor_t*)malloc(sizeof(DJI_Motor_t));
-    memset(&can_reg, 0, sizeof(Can_Register_t));
     memset(motor, 0, sizeof(DJI_Motor_t));
 
     can_reg.can_handle = reg->can_handle;
     can_reg.tx_dlc = 8;
     can_reg.can_device_callback = djiMotorCallback;
-    can_reg.can_device_offline_callback = djiMotorOfflineCallback;
-	can_reg.offline_threshold = 50;
+    can_reg.can_device_offline_callback = reg->motor_register_common.motorOfflineCallback;
+    can_reg.offline_threshold = MOTOR_OFFLINE_THRESHOLD;
     can_reg.parent = motor;
 
-    switch (reg->motor_type) {
+    switch (reg->motor_register_common.motor_type) {
         case DJI_MOTOR_6020:
             if (reg->id <= 4)
                 can_reg.tx_id = 0x1FF;
@@ -93,7 +86,7 @@ DJI_Motor_t* djiMotorAdd(DJI_Motor_Register_t* reg) {
             break;
     }
 
-    motor->motor_type = reg->motor_type;
+    motor->motor_common.motor_type = reg->motor_register_common.motor_type;
     motor->can_info = canDeviceRegister(&can_reg);
 
     dji_motor[id_cnt++] = motor;
@@ -106,7 +99,7 @@ Return_t djiMotorSendMessage() {
     Return_t ret = RETURN_SUCCESS;
 
     for (uint8_t i = 0; i < id_cnt; i++) {
-        if (dji_motor[i]->statu == STATE_OFFLINE) {
+        if (dji_motor[i]->motor_common.statu == STATE_OFFLINE) {
             dji_motor[i]->command_interfaces.command = 0;
             ret = RETURN_ERROR;
             continue;
@@ -115,8 +108,8 @@ Return_t djiMotorSendMessage() {
         if (dji_motor[i]->can_info->can_handle == &CAN_HANDLE1) {
             MotorSendBuffer_can1[(dji_motor[i]->can_info->rx_id - 0x201) * 2] =
                 dji_motor[i]->command_interfaces.command >> 8;
-            MotorSendBuffer_can1[(dji_motor[i]->can_info->rx_id - 0x201) * 2 +
-                                 1] = dji_motor[i]->command_interfaces.command;
+            MotorSendBuffer_can1[(dji_motor[i]->can_info->rx_id - 0x201) * 2 + 1] =
+                dji_motor[i]->command_interfaces.command;
 
             switch (dji_motor[i]->can_info->tx_id) {
                 case 0x200:
@@ -132,8 +125,8 @@ Return_t djiMotorSendMessage() {
         } else if (dji_motor[i]->can_info->can_handle == &CAN_HANDLE2) {
             MotorSendBuffer_can2[(dji_motor[i]->can_info->rx_id - 0x201) * 2] =
                 dji_motor[i]->command_interfaces.command >> 8;
-            MotorSendBuffer_can2[(dji_motor[i]->can_info->rx_id - 0x201) * 2 +
-                                 1] = dji_motor[i]->command_interfaces.command;
+            MotorSendBuffer_can2[(dji_motor[i]->can_info->rx_id - 0x201) * 2 + 1] =
+                dji_motor[i]->command_interfaces.command;
 
             switch (dji_motor[i]->can_info->tx_id) {
                 case 0x200:
@@ -151,8 +144,8 @@ Return_t djiMotorSendMessage() {
         else if (dji_motor[i]->can_info->can_handle == &CAN_HANDLE3) {
             MotorSendBuffer_can3[(dji_motor[i]->can_info->rx_id - 0x201) * 2] =
                 dji_motor[i]->command_interfaces.command >> 8;
-            MotorSendBuffer_can3[(dji_motor[i]->can_info->rx_id - 0x201) * 2 +
-                                 1] = dji_motor[i]->command_interfaces.command;
+            MotorSendBuffer_can3[(dji_motor[i]->can_info->rx_id - 0x201) * 2 + 1] =
+                dji_motor[i]->command_interfaces.command;
 
             switch (dji_motor[i]->can_info->tx_id) {
                 case 0x200:
@@ -170,29 +163,23 @@ Return_t djiMotorSendMessage() {
     }
 
     if (can_send_num[0][0] >= 0) {
-        canSendMessage(dji_motor[can_send_num[0][0]]->can_info,
-                       MotorSendBuffer_can1);
+        canSendMessage(dji_motor[can_send_num[0][0]]->can_info, MotorSendBuffer_can1);
     }
     if (can_send_num[0][1] >= 0) {
-        canSendMessage(dji_motor[can_send_num[0][1]]->can_info,
-                       MotorSendBuffer_can1 + 8);
+        canSendMessage(dji_motor[can_send_num[0][1]]->can_info, MotorSendBuffer_can1 + 8);
     }
     if (can_send_num[0][2] >= 0) {
-        canSendMessage(dji_motor[can_send_num[0][2]]->can_info,
-                       MotorSendBuffer_can1 + 16);
+        canSendMessage(dji_motor[can_send_num[0][2]]->can_info, MotorSendBuffer_can1 + 16);
     }
 
     if (can_send_num[1][0] >= 0) {
-        canSendMessage(dji_motor[can_send_num[1][0]]->can_info,
-                       MotorSendBuffer_can2);
+        canSendMessage(dji_motor[can_send_num[1][0]]->can_info, MotorSendBuffer_can2);
     }
     if (can_send_num[1][1] >= 0) {
-        canSendMessage(dji_motor[can_send_num[1][1]]->can_info,
-                       MotorSendBuffer_can2 + 8);
+        canSendMessage(dji_motor[can_send_num[1][1]]->can_info, MotorSendBuffer_can2 + 8);
     }
     if (can_send_num[1][2] >= 0) {
-        canSendMessage(dji_motor[can_send_num[1][2]]->can_info,
-                       MotorSendBuffer_can2 + 16);
+        canSendMessage(dji_motor[can_send_num[1][2]]->can_info, MotorSendBuffer_can2 + 16);
     }
 
     return ret;
@@ -201,7 +188,6 @@ Return_t djiMotorSendMessage() {
 void djiMotorInfoUpdate(DJI_Motor_t* motor, uint8_t* data) {
     motor->state_interfaces.ecd = (uint16_t)((data)[0] << 8 | (data)[1]);
     motor->state_interfaces.speed_rpm = (uint16_t)((data)[2] << 8 | (data)[3]);
-    motor->state_interfaces.given_current =
-        (uint16_t)((data)[4] << 8 | (data)[5]);
+    motor->state_interfaces.given_current = (uint16_t)((data)[4] << 8 | (data)[5]);
     motor->state_interfaces.temperate = (data)[6];
 }

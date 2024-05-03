@@ -11,16 +11,12 @@
 #ifndef SERVOMOTOR_H__
 #define SERVOMOTOR_H__
 
-#include "bsp_pwm.h"
+#include "Motor/Motor_common.h"
+#include "bsp_pwm/bsp_pwm.h"
 #include "main.h"
 #include "struct_typedef.h"
 
 #define MAX_SERVO_MOTOR_NUM 4
-
-typedef enum {
-    SERVO_MOTOR_ANGLE = 0xF1,
-    SERVO_MOTOR_SPEED = 0xF2,
-} Servo_Motor_Type_t;
 
 typedef struct {
     fp32 angle;
@@ -28,7 +24,7 @@ typedef struct {
 
 typedef struct Servo_Motor_ {
     uint8_t statu;  // online 0  / offline 1
-    Servo_Motor_Type_t motor_type;
+    Motor_Type_t motor_type;
     PWM_Device_t* pwm_info;
 
     Servo_Command_t command;
@@ -42,7 +38,7 @@ typedef struct Servo_Motor_ {
 } Servo_Motor_t;
 
 typedef struct {
-    Servo_Motor_Type_t motor_type;
+    Motor_Type_t motor_type;
     TIM_HandleTypeDef* htim;  // TIM句柄
     uint32_t channel;         // 通道
 

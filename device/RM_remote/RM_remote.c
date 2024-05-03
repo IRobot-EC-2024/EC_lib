@@ -21,7 +21,6 @@ static uint16_t KeyFormerChannal = 0;
 static uint16_t KeyJumpChannal = 0;
 static uint16_t KeyUsed = 0;
 
-
 // 取正函数
 static int16_t RC_abs(int16_t value) {
     if (value > 0) {
@@ -54,13 +53,14 @@ RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg) {
     RM_Remote_t* remote = (RM_Remote_t*)malloc(sizeof(RM_Remote_t));
     memset(remote, 0, sizeof(RM_Remote_t));
 
-    Usart_Register_t usart;
-    memset(&usart, 0, sizeof(Usart_Register_t));
-    usart.usart_handle = remote_reg->usart_handle;
-    usart.rx_buff_num = 1;
-    usart.rx_len = RC_FRAME_LENGTH;
-    usart.usart_device_callback = rmRemoteCallback;
-    remote->usart_info = usartDeviceRegister(&usart);
+    Usart_Register_t usart_register = {};
+
+    usart_register.usart_handle = remote_reg->usart_handle;
+    usart_register.rx_buff_num = 1;
+    usart_register.rx_len = RC_FRAME_LENGTH;
+    usart_register.usart_device_callback = rmRemoteCallback;
+    usart_register.offline_threshold = 100;
+    remote->usart_info = usartDeviceRegister(&usart_register);
 
     remote_instance = remote;
     return remote;
@@ -175,6 +175,15 @@ bool_t SwitchRightDownSide() { return (remote_instance->state_interfaces.rc.s[0]
 bool_t SwitchLeftUpSide() { return (remote_instance->state_interfaces.rc.s[1] == RC_SW_UP); }
 bool_t SwitchLeftMidSide() { return (remote_instance->state_interfaces.rc.s[1] == RC_SW_MID); }
 bool_t SwitchLeftDownSide() { return (remote_instance->state_interfaces.rc.s[1] == RC_SW_DOWN); }
+
+void remoteKeyMouseUpdate(uint16_t key_v, int16_t x, int16_t y, int16_t z, uint8_t press_l, uint8_t press_r) {
+    remote_instance->state_interfaces.key.v = key_v;
+    remote_instance->state_interfaces.mouse.x = x;
+    remote_instance->state_interfaces.mouse.y = y;
+    remote_instance->state_interfaces.mouse.z = z;
+    remote_instance->state_interfaces.mouse.press_l = press_l;
+    remote_instance->state_interfaces.mouse.press_r = press_r;
+}
 
 fp32 NormalizedLimit(fp32 input) {
     if (input > 1.0f) {

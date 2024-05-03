@@ -14,7 +14,9 @@
   //!                           CONFIGURE MACRO
   //******************************************************************************************
 
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 #define USE_DYNAMIC_MEMORY //!< Use system malloc/free function
 
 #include "hal_config.h"

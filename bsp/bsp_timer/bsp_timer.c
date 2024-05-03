@@ -11,6 +11,7 @@
 #include "bsp_timer.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 static Timer_Device_t* timer_device[TIMER_DEVICE_CNT] = {NULL};
 static uint8_t id_cnt = 0;
@@ -64,6 +65,7 @@ Timer_Device_t* timerDeviceRegister(Timer_Register_t* reg) {
     }
 
     Timer_Device_t* instance = (Timer_Device_t*)malloc(sizeof(Timer_Device_t));
+    memset(instance,0,sizeof(Timer_Device_t));
 
     instance->htim = reg->htim;
     instance->timer_device_callback = reg->timer_device_callback;

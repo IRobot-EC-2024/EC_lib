@@ -39,5 +39,6 @@ void pwmOnActivate(PWM_Device_t* pwm);
 void pwmOnDeactivate(PWM_Device_t* pwm);
 void pwmSetDuty(PWM_Device_t* pwm, float dutyratio);
 void pwmSetPeriod(PWM_Device_t* pwm, fp32 period);
+void PWMStartDMA(PWM_Device_t* pwm, uint32_t* pData, uint32_t Size);
 
 #endif
