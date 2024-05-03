@@ -71,7 +71,7 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
 Return_t rmdMotorSendMessage(RMD_Motor_t* motor) {
     if (motor->motor_common.statu == STATE_OFFLINE) {
         memset(&motor->command_interfaces, 0, sizeof(motor->command_interfaces));
-        return RETURN_ERROR;
+        return canSendMessage(motor->can_info, motor_send_buffer);
     }
 
     motor_send_buffer[0] = 0xA1;

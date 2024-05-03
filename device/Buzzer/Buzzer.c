@@ -18,7 +18,7 @@
 #include "main.h"
 
 static Buzzer_t* buzzer_instance[MAX_BUZZER_NUM];
-static uint8_t id_cnt = 0;  // 记录电机数量
+static uint8_t id_cnt = 0;
 
 const uint16_t buzzer_frequency[] = {
     131,  // 倍低1
@@ -89,6 +89,7 @@ const uint16_t buzzer_frequency[] = {
 
 Buzzer_t* buzzerInit(Buzzer_Register_t* reg) {
     Buzzer_t* instance = (Buzzer_t*)malloc(sizeof(Buzzer_t));
+    memset(instance, 0, sizeof(Buzzer_t));
 
     PWM_Register_t pwm_reg;
     pwm_reg.htim = reg->htim;
@@ -99,15 +100,17 @@ Buzzer_t* buzzerInit(Buzzer_Register_t* reg) {
     instance->pwm = pwmRegister(&pwm_reg);
     instance->volume = 0.5;
     pwmOnDeactivate(instance->pwm);
+
+    delayInit();
+
     buzzer_instance[id_cnt++] = instance;
     return instance;
 }
 
 void buzzerOnce(Buzzer_t* buzzer) {
     pwmOnActivate(buzzer->pwm);
-    delayMs(50);
+    delayMs(100);
     pwmOnDeactivate(buzzer->pwm);
-    delayMs(50);
 }
 
 void buzzerSeveralTimes(Buzzer_t* buzzer, uint8_t times, uint32_t duration_ms) {

@@ -41,10 +41,6 @@ static void usartDMARestart(Usart_Device_t* instance) {
 }
 
 static void usartStartReceive(Usart_Device_t* instance) {
-    if (instance == NULL) {
-        return;
-    }
-
     if (instance->rx_buff_num == 1) {
         // 单缓冲区
         HAL_UARTEx_ReceiveToIdle_DMA(instance->usart_handle, instance->rx_buff, instance->rx_len);
@@ -61,7 +57,7 @@ static void usartStartReceive(Usart_Device_t* instance) {
 
 static void usartOfflineCallback(Monitor_Device_t* monitor) {
     if (monitor == NULL || monitor->device == NULL) return;
-    Usart_Device_t* instance = (Usart_Device_t*)monitor->device;
+    Usart_Device_t* instance = (Usart_Device_t*)(monitor->device);
     instance->state = STATE_OFFLINE;
     if (instance->usart_device_offline_callback != NULL) {
         instance->usart_device_offline_callback(instance);
@@ -105,7 +101,7 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     instance->usart_device_offline_callback = reg->usart_device_offline_callback;
     instance->parent = reg->parent;
 
-    Monitor_Register_t monitor_reg={};
+    Monitor_Register_t monitor_reg = {};
 
     monitor_reg.device = instance;
     monitor_reg.offlineCallback = usartOfflineCallback;
@@ -113,8 +109,7 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     instance->monitor_handle = monitorInit(&monitor_reg);
 
     instance->state = STATE_ONLINE;
-	
-	
+
 #if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
     SCB_CleanDCache_by_Addr((uint32_t*)instance, sizeof(Usart_Device_t));
 #endif

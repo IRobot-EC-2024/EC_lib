@@ -79,7 +79,7 @@ typedef struct {
 DM_Motor_t* dmMotorAdd(DM_Motor_Register_t* reg);
 void dmMotorDelete(DM_Motor_t* motor);
 void dmMotorInfoUpdate(DM_Motor_t* motor, uint8_t* data);
-void dmMotorEnable(DM_Motor_t* motor);
+Return_t dmMotorEnable(DM_Motor_t* motor);
 void dmMotorDisable(DM_Motor_t* motor);
 void dmMotorSetZero(DM_Motor_t* motor);
 void dmMotorClearError(DM_Motor_t* motor);

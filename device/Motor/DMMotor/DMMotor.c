@@ -88,7 +88,7 @@ DM_Motor_t* dmMotorAdd(DM_Motor_Register_t* reg) {
 Return_t dmMotorSendMessage(DM_Motor_t* motor) {
     if (motor->motor_common.statu == STATE_OFFLINE) {
         memset(&motor->command_interfaces, 0, sizeof(motor->command_interfaces));
-        return RETURN_ERROR;
+        return dmMotorEnable(motor);
     }
 
     uint16_t pos_tmp, vel_tmp, kp_tmp, kd_tmp, tor_tmp;
@@ -144,7 +144,7 @@ void dmMotorInfoUpdate(DM_Motor_t* motor, uint8_t* data) {
     motor->state_interfaces.t_rotor = data[7];
 }
 
-void dmMotorEnable(DM_Motor_t* motor) {
+Return_t dmMotorEnable(DM_Motor_t* motor) {
     motor_send_buffer[0] = 0xFF;
     motor_send_buffer[1] = 0xFF;
     motor_send_buffer[2] = 0XFF;
@@ -154,7 +154,7 @@ void dmMotorEnable(DM_Motor_t* motor) {
     motor_send_buffer[6] = 0xFF;
     motor_send_buffer[7] = 0xFC;
 
-    canSendMessage(motor->can_info, motor_send_buffer);
+    return canSendMessage(motor->can_info, motor_send_buffer);
 }
 void dmMotorDisable(DM_Motor_t* motor) {
     motor_send_buffer[0] = 0xFF;

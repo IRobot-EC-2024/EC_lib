@@ -53,13 +53,14 @@ RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg) {
     RM_Remote_t* remote = (RM_Remote_t*)malloc(sizeof(RM_Remote_t));
     memset(remote, 0, sizeof(RM_Remote_t));
 
-    Usart_Register_t usart;
-    memset(&usart, 0, sizeof(Usart_Register_t));
-    usart.usart_handle = remote_reg->usart_handle;
-    usart.rx_buff_num = 1;
-    usart.rx_len = RC_FRAME_LENGTH;
-    usart.usart_device_callback = rmRemoteCallback;
-    remote->usart_info = usartDeviceRegister(&usart);
+    Usart_Register_t usart_register = {};
+
+    usart_register.usart_handle = remote_reg->usart_handle;
+    usart_register.rx_buff_num = 1;
+    usart_register.rx_len = RC_FRAME_LENGTH;
+    usart_register.usart_device_callback = rmRemoteCallback;
+    usart_register.offline_threshold = 100;
+    remote->usart_info = usartDeviceRegister(&usart_register);
 
     remote_instance = remote;
     return remote;

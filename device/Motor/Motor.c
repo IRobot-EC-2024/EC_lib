@@ -99,7 +99,10 @@ Return_t motorSetMessage(Motor_t* motor) {
     switch (motor_mask) {
         case DJI_MOTOR_MASK: {
             if (motor->control_mode == MOTOR_CM_COMMAND_MODE) {
-                motor->dji->command_interfaces.command = motor->command_interfaces.command;
+                if (motor->motor_common->statu == STATE_OFFLINE)
+                    motor->dji->command_interfaces.command = 0;
+                else
+                    motor->dji->command_interfaces.command = motor->command_interfaces.command;
             } else {
                 // todo：dji电机其他控制模式
                 ret = RETURN_ERROR;
@@ -108,7 +111,10 @@ Return_t motorSetMessage(Motor_t* motor) {
 
         case DM_MOTOR_MASK: {
             if (motor->control_mode == MOTOR_CM_COMMAND_MODE) {
-                motor->dm->command_interfaces.t = motor->command_interfaces.command;
+                if (motor->motor_common->statu == STATE_OFFLINE)
+                    motor->dm->command_interfaces.t = 0;
+                else
+                    motor->dm->command_interfaces.t = motor->command_interfaces.command;
             } else {
                 // todo: dm电机其他控制模式
                 ret = RETURN_ERROR;
@@ -117,7 +123,10 @@ Return_t motorSetMessage(Motor_t* motor) {
 
         case RMD_MOTOR_MASK: {
             if (motor->control_mode == MOTOR_CM_COMMAND_MODE) {
-                motor->rmd->command_interfaces.iqControl = motor->command_interfaces.command;
+                if (motor->motor_common->statu == STATE_OFFLINE)
+                    motor->rmd->command_interfaces.iqControl = 0;
+                else
+                    motor->rmd->command_interfaces.iqControl = motor->command_interfaces.command;
             } else {
                 // todo: rmd电机其他控制模式
                 ret = RETURN_ERROR;
