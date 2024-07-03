@@ -30,8 +30,9 @@ static int16_t RC_abs(int16_t value) {
     }
 }
 
-void rmRemoteCallback(Usart_Device_t* usart) {
+static void rmRemoteCallback(Usart_Device_t* usart) {
     if (usart->rx_info.this_time_rx_len == RC_FRAME_LENGTH) {
+        remote_instance->state = STATE_ONLINE;
         // 处理遥控器数据
         if (!usart->rx_info.rx_buff_select) {
             sbus_to_rc(usart->rx_buff);
@@ -56,10 +57,12 @@ RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg) {
     Usart_Register_t usart_register = {};
 
     usart_register.usart_handle = remote_reg->usart_handle;
-    usart_register.rx_buff_num = 1;
+    usart_register.rx_buff_num = 2;
     usart_register.rx_len = RC_FRAME_LENGTH;
     usart_register.usart_device_callback = rmRemoteCallback;
+    usart_register.usart_device_offline_callback = rmRemoteOfflineCallback;
     usart_register.offline_threshold = 100;
+    usart_register.parent = remote;
     remote->usart_info = usartDeviceRegister(&usart_register);
 
     remote_instance = remote;
@@ -108,8 +111,8 @@ void sbus_to_rc(uint8_t* rx_data) {
     remote_instance->state_interfaces.rc.ch[3] = ((rx_data[4] >> 1) | (rx_data[5] << 7)) & 0x07ff;  //!< Channel 3
     remote_instance->state_interfaces.rc.s[0] = ((rx_data[5] >> 4) & 0x0003);                       //!< Switch left
     remote_instance->state_interfaces.rc.s[1] = ((rx_data[5] >> 4) & 0x000C) >> 2;                  //!< Switch right
-    remote_instance->state_interfaces.mouse.y = -(rx_data[6] | (rx_data[7] << 8));                  //!< Mouse X axis
-    remote_instance->state_interfaces.mouse.x = -(rx_data[8] | (rx_data[9] << 8));                  //!< Mouse Y axis
+    remote_instance->state_interfaces.mouse.x = (rx_data[6] | (rx_data[7] << 8));                   //!< Mouse X axis
+    remote_instance->state_interfaces.mouse.y = (rx_data[8] | (rx_data[9] << 8));                   //!< Mouse Y axis
     remote_instance->state_interfaces.mouse.z = rx_data[10] | (rx_data[11] << 8);                   //!< Mouse Z axis
     remote_instance->state_interfaces.mouse.press_l = rx_data[12];                  //!< Mouse Left Is Press ?
     remote_instance->state_interfaces.mouse.press_r = rx_data[13];                  //!< Mouse Right Is Press ?
@@ -125,19 +128,19 @@ void sbus_to_rc(uint8_t* rx_data) {
     KeyJumpChannal = (remote_instance->state_interfaces.key.v ^ KeyFormerChannal);
 }
 
-bool_t CheckKeyPressPart(uint16_t Key) {
+bool_t rmCheckKeyPressPart(uint16_t Key) {
     if ((remote_instance->state_interfaces.key.v & Key) == 0) return 0;
 
     return 1;
 }
 
-bool_t CheckKeyPress(uint16_t Key) {
+bool_t rmCheckKeyPress(uint16_t Key) {
     if ((remote_instance->state_interfaces.key.v & Key) == Key) return 1;
 
     return 0;
 }
 
-bool_t CheakKeyPressOnce(uint16_t Key) {
+bool_t rmCheakKeyPressOnce(uint16_t Key) {
     if ((remote_instance->state_interfaces.key.v & Key) == 0) {
         KeyUsed &= (~Key);
         return 0;
@@ -161,12 +164,12 @@ fp32 RemoteChannalLeftY() { return (-remote_instance->state_interfaces.rc.ch[2] 
 fp32 RemoteDial() { return (remote_instance->state_interfaces.rc.ch[4] / 660.0f); }
 
 // 归一化鼠标移动
-fp32 MouseMoveX() { return (remote_instance->state_interfaces.mouse.x / 32768.0f); }
-fp32 MouseMoveY() { return (remote_instance->state_interfaces.mouse.y / 32768.0f); }
+fp32 rmMouseMoveX() { return (remote_instance->state_interfaces.mouse.x / 32768.0f); }
+fp32 rmMouseMoveY() { return (remote_instance->state_interfaces.mouse.y / 32768.0f); }
 
 // 鼠标左右键
-bool_t MousePressLeft() { return remote_instance->state_interfaces.mouse.press_l; }
-bool_t MousePressRight() { return remote_instance->state_interfaces.mouse.press_r; }
+bool_t rmMousePressLeft() { return remote_instance->state_interfaces.mouse.press_l; }
+bool_t rmMousePressRight() { return remote_instance->state_interfaces.mouse.press_r; }
 
 // 拨杆位置检测
 bool_t SwitchRightUpSide() { return (remote_instance->state_interfaces.rc.s[0] == RC_SW_UP); }

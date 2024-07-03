@@ -14,7 +14,14 @@
 #include "bsp_can/bsp_can.h"
 #include "struct_typedef.h"
 
-#define MOTOR_OFFLINE_THRESHOLD 50  // ms
+#define GM6020_MAX_OUTPUT 30000
+#define GM6020_MAX_IOUTPUT 10000
+#define M3508_MAX_OUTPUT 16384
+#define M3508_MAX_IOUTPUT 6000
+#define M2006_MAX_OUTPUT 10000
+#define M2006_MAX_IOUTPUT 5000
+
+#define MOTOR_OFFLINE_THRESHOLD 20  // ms
 
 typedef enum {
     DJI_MOTOR_MASK = 0x10,

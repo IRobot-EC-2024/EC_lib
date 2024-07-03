@@ -50,7 +50,7 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
     can_reg.can_device_offline_callback = reg->motor_register_common.motorOfflineCallback;
     switch (reg->motor_register_common.motor_type) {
         case RMD_MOTOR_4015:
-            can_reg.rx_id = 0x140 + reg->id;
+            can_reg.rx_id = 0x240 + reg->id;
             can_reg.tx_id = 0x140 + reg->id;
             break;
         default:
@@ -64,14 +64,28 @@ RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg) {
     motor->can_info = canDeviceRegister(&can_reg);
 
     rmd_motor[id_cnt++] = motor;
+    rmdMotorEnable(motor);
 
     return motor;
+}
+
+Return_t rmdMotorEnable(RMD_Motor_t* motor) {
+    motor_send_buffer[0] = 0x88;
+    motor_send_buffer[1] = 0;
+    motor_send_buffer[2] = 0;
+    motor_send_buffer[3] = 0;
+    motor_send_buffer[4] = 0;
+    motor_send_buffer[5] = 0;
+    motor_send_buffer[6] = 0;
+    motor_send_buffer[7] = 0;
+
+    return canSendMessage(motor->can_info, motor_send_buffer);
 }
 
 Return_t rmdMotorSendMessage(RMD_Motor_t* motor) {
     if (motor->motor_common.statu == STATE_OFFLINE) {
         memset(&motor->command_interfaces, 0, sizeof(motor->command_interfaces));
-        return canSendMessage(motor->can_info, motor_send_buffer);
+        return rmdMotorEnable(motor);
     }
 
     motor_send_buffer[0] = 0xA1;
@@ -103,5 +117,7 @@ void rmdMotorInfoUpdate(RMD_Motor_t* motor, uint8_t* data) {
             motor->state_interfaces.speed = (uint16_t)((data)[5] << 8 | (data)[4]);
             motor->state_interfaces.encoder = (uint16_t)((data)[7] << 8 | (data)[6]);
         } break;
+        default:
+            break;
     }
 }

@@ -62,6 +62,7 @@ static void usartOfflineCallback(Monitor_Device_t* monitor) {
     if (instance->usart_device_offline_callback != NULL) {
         instance->usart_device_offline_callback(instance);
     }
+    usartStartReceive(instance);
 }
 
 Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
@@ -76,6 +77,7 @@ Usart_Device_t* usartDeviceRegister(Usart_Register_t* reg) {
     }
 
     Usart_Device_t* instance = (Usart_Device_t*)malloc(sizeof(Usart_Device_t));
+    memset(instance, 0, sizeof(Usart_Device_t));
 
     if (reg->rx_buff_num > 2) {
         reg->rx_buff_num = 2;

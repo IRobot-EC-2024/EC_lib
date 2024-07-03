@@ -50,6 +50,7 @@ typedef struct {
 
 RMD_Motor_t* rmdMotorAdd(RMD_Motor_Register_t* reg);
 void rmdMotorDelete(RMD_Motor_t* motor);
+Return_t rmdMotorEnable(RMD_Motor_t* motor);
 void rmdMotorInfoUpdate(RMD_Motor_t* motor, uint8_t* data);
 Return_t rmdMotorSendMessage(RMD_Motor_t* motor);
 

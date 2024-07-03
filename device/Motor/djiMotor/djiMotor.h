@@ -34,13 +34,13 @@ typedef struct {
 } DJI_Command_t;
 
 typedef struct DJI_Motor_ {
-    Motor_Common_t motor_common;
+    Motor_Common_t motor_common;  // 电机公用结构体
 
-    DJI_Motor_Info_t state_interfaces;
-    Can_Device_t* can_info;
-    DJI_Command_t command_interfaces;
+    Can_Device_t* can_info;             // 电机通信方式结构体
+    DJI_Motor_Info_t state_interfaces;  // 电机原始状态数据结构体
+    DJI_Command_t command_interfaces;   // 电机控制命令结构体
 
-    void (*motorCallback)(const struct DJI_Motor_*);
+    void (*motorCallback)(const struct DJI_Motor_*);  // 电机接收处理回调
 } DJI_Motor_t;
 
 typedef struct {

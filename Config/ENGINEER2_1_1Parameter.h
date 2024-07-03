@@ -1,9 +1,7 @@
 #ifndef __ENGINEER2_Parameter
 #define __ENGINEER2_Parameter
 
-// 兑换站前伸目标速度
-#define EXCHANEG_PROTRACTION_SPEED 3000
-#define EXCHANEG_PROTRACTION_SPEED_SLOWLY 600
+/******************** 电机pid参数定义区域开始 ********************/
 
 // 初始前伸速度环pid参数
 #define PROTRACTION_LEFT_MOTOR_SPEED_INIT_PID_KP 4  // 40
@@ -46,9 +44,6 @@
 #define PROTRACTION_MOTOR_SPEED_MAX_IOUT M2006_MAX_IOUTPUT
 #define PROTRACTION_MOTOR_ANGLE_MAX_OUT 6000
 #define PROTRACTION_MOTOR_ANGLE_MAX_IOUT 2000
-
-// 前伸电机状态关节角度
-#define PROTRACTION_JOINT_ANGLE_A_LITTLE_DISTANCE 120.0f
 
 //---------------------------------------机械臂无载参数-----------------------------------------
 // 机械臂关节0双环pid参数
@@ -168,7 +163,7 @@
 #define ARM_MOTOR1_SPEED_INIT_PID_KD 0
 
 // 机械臂关节2双环pid参数
-#define ARM_MOTOR2_ANGLE_INIT_PID_KP 20
+#define ARM_MOTOR2_ANGLE_INIT_PID_KP 35
 #define ARM_MOTOR2_ANGLE_INIT_PID_KI 0
 #define ARM_MOTOR2_ANGLE_INIT_PID_KD 0
 #define ARM_MOTOR2_SPEED_INIT_PID_KP 8
@@ -217,13 +212,13 @@
 #define ARM_MOTOR0_ANGLE_MAX_IOUT 800.0
 #define ARM_MOTOR1_ANGLE_MAX_OUT 2000.0
 #define ARM_MOTOR1_ANGLE_MAX_IOUT 800.0
-#define ARM_MOTOR2_ANGLE_MAX_OUT 3000.0
-#define ARM_MOTOR2_ANGLE_MAX_IOUT 1000.0
-#define ARM_MOTOR3_ANGLE_MAX_OUT 2000.0
+#define ARM_MOTOR2_ANGLE_MAX_OUT 1000.0
+#define ARM_MOTOR2_ANGLE_MAX_IOUT 50.0
+#define ARM_MOTOR3_ANGLE_MAX_OUT 2500.0
 #define ARM_MOTOR3_ANGLE_MAX_IOUT 400.0
-#define ARM_MOTOR4_ANGLE_MAX_OUT 2000.0
+#define ARM_MOTOR4_ANGLE_MAX_OUT 3000.0
 #define ARM_MOTOR4_ANGLE_MAX_IOUT 800.0
-#define ARM_MOTOR5_ANGLE_MAX_OUT 2000.0
+#define ARM_MOTOR5_ANGLE_MAX_OUT 3000.0
 #define ARM_MOTOR5_ANGLE_MAX_IOUT 800.0
 
 #define ARM_MOTOR0_ANGLE_MAX 36000
@@ -380,22 +375,29 @@
 //---------------------------------------金矿普通参数-----------------------------------------
 
 // 云台YAW速度环参数
-#define VIEW_MOTO_YAW_SPEED_KP 0.1
-#define VIEW_MOTO_YAW_SPEED_KI 0
-#define VIEW_MOTO_YAW_SPEED_KD 0
+#define VIEW_MOTO_YAW_SPEED_KP 0.18f
+#define VIEW_MOTO_YAW_SPEED_KI 0.0f
+#define VIEW_MOTO_YAW_SPEED_KD 0.005f
 
 // 云台YAW角度环参数
-#define VIEW_MOTO_YAW_ANGLE_KP 70    // 9
-#define VIEW_MOTO_YAW_ANGLE_KI 0.01  // 0.03
-#define VIEW_MOTO_YAW_ANGLE_KD 0     // 100
+#define VIEW_MOTO_YAW_ANGLE_KP 50.0f  // 1.2f
+#define VIEW_MOTO_YAW_ANGLE_KI 0.0f   // 0.12f
+#define VIEW_MOTO_YAW_ANGLE_KD 0      // 0
 
 // 最大YAW速度输出
-#define MAX_YAW_SPEED_OUT 1000.0f  // 3800.0f
-#define MAX_YAW_SPEED_IOUT 50.0f
+#define MAX_YAW_SPEED_OUT 1000.0f  // 10.0f
+#define MAX_YAW_SPEED_IOUT 0.0f
 
 // 最大YAW角度输出
-#define MAX_YAW_ANGLE_OUT 6000.0f
-#define MAX_YAW_ANGLE_IOUT 1000.0f  // 150.0f
+#define MAX_YAW_ANGLE_OUT 2500.0f
+#define MAX_YAW_ANGLE_IOUT 100.0f  // 150.0f
+
+/******************** 电机pid参数定义区域结束 ********************/
+
+
+/******************** 电机pid参数定义区域结束 ********************/
+
+/******************** 电机pid参数定义区域结束 ********************/
 
 // 真空泵状态
 #define PUMP0_STATE 0x01
@@ -408,23 +410,10 @@
 #define PUMP2_CHANNEL 0x40
 #define PUMP3_CHANNEL 0x80
 
-// 位置环到达目标位置死区
-#define REACH_BAND 12
-
-// 存在模式转换
-#define TRANSLATION 1
-
-// 自动对位模式
-#define ALIGNMENT_MODE 1
-
 // 定义长按时间
 #define LONG_PRESSED_TIME 1000
 
 // 定义吸盘形成真空所需时间
 #define VACUUM_TIME 1000
-
-#define EXCHANGE_STATION 4
-
-#define YAW_MEDIUM_ANGLE 0.5f
 
 #endif
