@@ -78,8 +78,7 @@ typedef struct {
     UART_HandleTypeDef* usart_handle;
 } RM_Remote_Register_t;
 
-/* ----------------------- Function Declare
- * ------------------------------------- */
+/* ----------------------- Function Declare--------------------------------- */
 RM_Remote_t* rmRemoteAdd(RM_Remote_Register_t* remote_reg);
 void rmRemoteDelete(RM_Remote_t* remote);
 uint8_t rmRemoteIsError();
@@ -87,9 +86,9 @@ void solveRCLost(void);
 void solveDataError(void);
 void sbus_to_rc(uint8_t* rx_data);
 
-extern bool_t CheckKeyPressPart(uint16_t Key);  // 长按触发,部分匹配
-extern bool_t CheckKeyPress(uint16_t Key);      // 长按触发,完全匹配
-extern bool_t CheckKeyPressOnce(uint16_t Key);  // 边沿触发
+extern bool_t rmCheckKeyPressPart(uint16_t Key);  // 长按触发,部分匹配
+extern bool_t rmCheckKeyPress(uint16_t Key);      // 长按触发,完全匹配
+extern bool_t rmCheckKeyPressOnce(uint16_t Key);  // 边沿触发
 // 归一化摇杆值
 extern fp32 RemoteChannalRightX();
 extern fp32 RemoteChannalRightY();
@@ -98,12 +97,12 @@ extern fp32 RemoteChannalLeftY();
 extern fp32 RemoteDial();
 
 // 归一化鼠标移动
-extern fp32 MouseMoveX();
-extern fp32 MouseMoveY();
+extern fp32 rmMouseMoveX();
+extern fp32 rmMouseMoveY();
 
 // 鼠标左右键
-extern bool_t MousePressLeft();
-extern bool_t MousePressRight();
+extern bool_t rmMousePressLeft();
+extern bool_t rmMousePressRight();
 
 // 拨杆位置检测
 extern bool_t SwitchRightUpSide();

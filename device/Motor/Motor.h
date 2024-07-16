@@ -77,9 +77,12 @@ typedef struct {
 } Motor_Command_t;
 
 typedef struct {
+    // 电机控制模式
     Motor_Control_Mode_t control_mode;
 
+    // 电机反馈状态结构体
     Motor_Info_t state_interfaces;
+    // 电机命令结构体
     Motor_Command_t command_interfaces;
 
     // 原始电机指针
@@ -87,7 +90,7 @@ typedef struct {
         DJI_Motor_t* dji;
         DM_Motor_t* dm;
         RMD_Motor_t* rmd;
-        Motor_Common_t* motor_common;
+        Motor_Common_t* motor_common;  // 电机共用指针
     };
 } Motor_t;
 

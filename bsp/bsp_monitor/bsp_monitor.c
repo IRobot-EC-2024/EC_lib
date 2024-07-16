@@ -23,6 +23,7 @@ static uint8_t id_cnt = 0;  // 全局CAN实例索引,每次有新的模块注册
  */
 Monitor_Device_t* monitorInit(Monitor_Register_t* monitor_reg) {
     Monitor_Device_t* monitor_device = (Monitor_Device_t*)malloc(sizeof(Monitor_Device_t));
+    memset(monitor_device, 0, sizeof(Monitor_Device_t));
 
     memset(monitor_device, 0, sizeof(Monitor_Device_t));
     monitor_device->device = monitor_reg->device;
@@ -59,22 +60,14 @@ Monitor_Device_Status monitorCounter(Monitor_Device_t* monitor_device) {
         return MONITOR_DEVICE_OFFLINE;
     }
 
-    if (monitor_device->offline_flag == MONITOR_DEVICE_OFFLINE) {
-        if (monitor_device->offlineCallback != NULL) {
-            monitor_device->offlineCallback(monitor_device);
-        }
-        return MONITOR_DEVICE_OFFLINE;
-    }
-
-    monitor_device->offline_counter++;
     if (monitor_device->offline_counter >= monitor_device->offline_threshold) {
         monitor_device->offline_flag = MONITOR_DEVICE_OFFLINE;
         if (monitor_device->offlineCallback != NULL) {
             monitor_device->offlineCallback(monitor_device);
         }
-
         return MONITOR_DEVICE_OFFLINE;
     }
+    monitor_device->offline_counter++;
 
     return MONITOR_DEVICE_ONLINE;
 }

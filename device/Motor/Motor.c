@@ -288,20 +288,14 @@ static void rmdMotorInfo(const RMD_Motor_t* motor) {
 
     Motor_t* instance = motor->motor_common.common;
     instance->state_interfaces.last_angle = instance->state_interfaces.angle;
-    instance->state_interfaces.angle = loop_float_constrain(motor->state_interfaces.encoder / 16383.0 * 360, 0, 360);
+    instance->state_interfaces.angle = loop_float_constrain(motor->state_interfaces.encoder, 0, 360);
 
     instance->state_interfaces.current = motor->state_interfaces.iq / 2000.0 * 32;
-    instance->state_interfaces.speed_rpm = motor->state_interfaces.speed / PI * 60;
+    instance->state_interfaces.speed_rpm = motor->state_interfaces.speed;
     instance->state_interfaces.temperate = motor->state_interfaces.temperature;
 
-    if ((instance->state_interfaces.angle - instance->state_interfaces.last_angle) > 180) {
-        instance->state_interfaces.rounds--;
-    } else if ((instance->state_interfaces.angle - instance->state_interfaces.last_angle) < -180) {
-        instance->state_interfaces.rounds++;
-    }
-
-    instance->state_interfaces.series_angle =
-        instance->state_interfaces.angle + 360 * instance->state_interfaces.rounds;
+    instance->state_interfaces.series_angle = motor->state_interfaces.encoder;
+    instance->state_interfaces.rounds = motor->state_interfaces.encoder / 360;
 }
 
 static void motorOfflineCallback(Can_Device_t* can_device) {

@@ -34,6 +34,7 @@ uint8_t referee_figure_fifo_buf[REFEREE_FIGURE_FIFO_ELEMENT_NUM * REFEREE_FIGURE
 // 裁判系统通信接收
 static void refereeReceiverCallback(Usart_Device_t* usart) {
     if (usart == NULL || usart->parent == NULL) return;
+    referee_instance->state = STATE_ONLINE;
 
     if (!usart->rx_info.rx_buff_select) {
         fifo_s_puts(&referee_instance->referee_receive_fifo, (char*)usart->rx_buff, usart->rx_info.this_time_rx_len);
@@ -55,7 +56,7 @@ Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* hu
     Referee_t* referee = (Referee_t*)malloc(sizeof(Referee_t));
     memset(referee, 0, sizeof(Referee_t));
 
-    Usart_Register_t usart_reg={};
+    Usart_Register_t usart_reg = {};
 
     if (huart1 != NULL) {
         memset(&usart_reg, 0, sizeof(Usart_Register_t));
@@ -80,7 +81,7 @@ Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* hu
         usart_reg.usart_device_callback = refereeReceiverCallback;
         usart_reg.usart_device_offline_callback = refereeOfflineCallback;
         usart_reg.parent = referee;
-        usart_reg.offline_threshold = 100;
+        usart_reg.offline_threshold = 500;
         referee->vision_info = usartDeviceRegister(&usart_reg);
     }
 
@@ -280,7 +281,7 @@ uint16_t referee_unpack_fifo_data(void) {
             } break;
         }
     }
-	return 0;
+    return 0;
 }
 
 // 裁判系统通信发送
