@@ -67,6 +67,7 @@ void pwmSetPeriod(PWM_Device_t* pwm, fp32 period) {
     __HAL_TIM_SetAutoreload(pwm->htim, period * ((pwm->tclk) / (pwm->htim->Init.Prescaler + 1)) / 1000);
 }
 void pwmSetDuty(PWM_Device_t* pwm, float dutyratio) {
+    pwm->dutyratio = dutyratio;
     __HAL_TIM_SetCompare(pwm->htim, pwm->channel, dutyratio * (pwm->htim->Instance->ARR));
 }
 

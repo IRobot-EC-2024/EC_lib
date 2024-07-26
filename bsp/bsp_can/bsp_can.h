@@ -12,6 +12,7 @@
 #define BSP_CAN_H__
 
 #include "bsp_monitor/bsp_monitor.h"
+#include "hal_config.h"
 #include "struct_typedef.h"
 
 #if defined(STM32F407xx) || defined(STM32F427xx)

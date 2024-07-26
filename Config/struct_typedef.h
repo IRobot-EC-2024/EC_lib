@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 
-#include "main.h"
+#include "hal_config.h"
 
 typedef float fp32;
 typedef double fp64;

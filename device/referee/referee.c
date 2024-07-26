@@ -16,13 +16,6 @@
 #define REFEREE_FIGURE_FIFO_ELEMENT_NUM 16
 #define REFEREE_FIGURE_FIFO_ELEMENT_SIZE 15
 
-#define Robot_ID UI_Data_RobotID_BEngineer
-#define Cilent_ID UI_Data_CilentID_BEngineer  // 机器人角色设置
-
-fp32 test_det_t = 0;
-fp32 max_det_t = 0;
-fp32 avr_det_t = 0;
-
 static Referee_t* referee_instance;
 
 uint8_t referee_receive_fifo_buf[REFEREE_FIFO_BUF_LENGTH];
@@ -76,7 +69,7 @@ Referee_t* refereeReceiverAdd(UART_HandleTypeDef* huart1, UART_HandleTypeDef* hu
     if (huart2 != NULL) {
         memset(&usart_reg, 0, sizeof(Usart_Register_t));
         usart_reg.usart_handle = huart2;
-        usart_reg.rx_buff_num = 2;
+        usart_reg.rx_buff_num = 1;
         usart_reg.rx_len = 256;
         usart_reg.usart_device_callback = refereeReceiverCallback;
         usart_reg.usart_device_offline_callback = refereeOfflineCallback;
@@ -285,13 +278,17 @@ uint16_t referee_unpack_fifo_data(void) {
 }
 
 // 裁判系统通信发送
-void refereeInteractionPush(robot_interaction_data_t* interaction_data, uint8_t user_data_length) {
-    if (interaction_data == NULL || user_data_length > ROBOT_INTERACTION_DATA_LENGTH) return;
-
-    uint8_t i = 0;
+void refereeInteractionPush(uint16_t data_cmd_id, uint8_t* data, uint8_t user_data_length) {
+    if (data == NULL || user_data_length > ROBOT_INTERACTION_DATA_LENGTH) return;
+    robot_interaction_data_t interaction_data;
+    interaction_data.data_cmd_id = data_cmd_id;
+    interaction_data.sender_id = referee_instance->referee_info.robot_status.robot_id;
+    interaction_data.receiver_id = referee_instance->referee_info.robot_status.robot_id + 0x0100;
+    memcpy(&interaction_data.user_data, data, user_data_length);
+    user_data_length += 6;
 
     fifo_s_put(&referee_instance->referee_send_fifo, user_data_length);
-    fifo_s_puts(&referee_instance->referee_send_fifo, (char*)interaction_data, user_data_length);
+    fifo_s_puts(&referee_instance->referee_send_fifo, (char*)&interaction_data, user_data_length);
 }
 
 /**
@@ -304,7 +301,7 @@ void refereeInteractionSend() {
     static frame_header_struct_t framehead;
     static uint8_t tx_data[128];
 
-    uint8_t i = 0, ptr = 0;
+    uint8_t ptr = 0;
     uint8_t data_length = 0;
     uint16_t cmd_id = 0, ui_crc_16 = 0;
 
@@ -314,24 +311,24 @@ void refereeInteractionSend() {
     framehead.SOF = UI_SOF;
     framehead.data_length = data_length;
     framehead.seq = referee_instance->seq++;
-    framehead.CRC8 = Get_CRC8_Check_Sum_UI((uint8_t*)&framehead, 4, 0xFF);
+    framehead.CRC8 = Get_CRC8_Check_Sum_UI((uint8_t*)&framehead, 4);
 
     memset(tx_data, 0, sizeof(tx_data));
     memcpy(tx_data + ptr, &framehead, sizeof(frame_header_struct_t));
     ptr += sizeof(frame_header_struct_t);
 
-    cmd_id = 0x0301;
+    cmd_id = ROBOT_INTERACTION_DATA_CMD_ID;
     memcpy(tx_data + ptr, &cmd_id, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
 
     memcpy(tx_data + ptr, &interaction_data, data_length);
     ptr += data_length;
 
-    ui_crc_16 = Get_CRC16_Check_Sum_UI(tx_data, ptr, 0xFFFF);
+    ui_crc_16 = Get_CRC16_Check_Sum_UI(tx_data, ptr);
     memcpy(tx_data + ptr, &ui_crc_16, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
 
-    usartSendMessage(referee_instance->usart_info, tx_data, ptr, USART_TRANSFER_DMA);
+    usartSendMessage(referee_instance->usart_info, tx_data, ptr, USART_TRANSFER_BLOCKING);
 }
 
 uint32_t refereeInteractionRemain() { return referee_instance->referee_send_fifo.used_num; }
@@ -341,32 +338,63 @@ void refereeFigurePush(interaction_figure_t* interaction_figure) {
 }
 
 void refereeFigure2Interaction() {
+    if (referee_instance == NULL) return;
     // 图像数目种类
     static uint8_t figure_bag_type[4] = {7, 5, 2, 1};
 
     // 循环变量
     uint8_t i = 0, type = 0;
 
-    robot_interaction_data_t interaction_data;
     interaction_figure_t interaction_figure[7];
 
     uint8_t figure_num = referee_instance->referee_figure_fifo.used_num;
-    uint8_t figure_bag = figure_bag_type[0];
+    uint8_t figure_bag;
 
     for (type = 0; type < 4; type++) {
         figure_bag = figure_bag_type[type];
-
-        interaction_data.data_cmd_id = 0x0104 - type;
-
-        interaction_data.receiver_id = Cilent_ID;
-        interaction_data.sender_id = Robot_ID;
-
         for (; figure_num >= figure_bag; figure_num -= figure_bag) {
             for (i = 0; i < figure_bag; i++) {
                 fifo_get(&referee_instance->referee_figure_fifo, &interaction_figure[i]);
             }
-            memcpy(interaction_data.user_data, interaction_figure, sizeof(interaction_figure_t) * figure_bag);
-            refereeInteractionPush(&interaction_data, sizeof(interaction_figure_t) * figure_bag + 6);
+            refereeInteractionPush(0x0104 - type, (uint8_t*)&interaction_figure,
+                                   sizeof(interaction_figure_t) * figure_bag);
         }
     }
+}
+
+void refereeCustomInfoSend(uint8_t* data, uint8_t data_length) {
+    if (data == NULL || referee_instance == NULL || data_length > 30) return;
+
+    static custom_info_t custom_info = {};
+    static frame_header_struct_t framehead = {};
+    static uint8_t tx_data[128] = {};
+
+    uint8_t ptr = 0;
+    uint16_t cmd_id = 0, ui_crc_16 = 0;
+
+    custom_info.sender_id = referee_instance->referee_info.robot_status.robot_id;
+    custom_info.receiver_id = referee_instance->referee_info.robot_status.robot_id + 0x0100;
+    memcpy(&custom_info.user_data, data, data_length);
+    data_length = 34;
+
+    framehead.SOF = UI_SOF;
+    framehead.data_length = data_length;
+    framehead.seq = referee_instance->seq++;
+    framehead.CRC8 = Get_CRC8_Check_Sum_UI((uint8_t*)&framehead, 4);
+
+    memcpy(tx_data + ptr, &framehead, sizeof(frame_header_struct_t));
+    ptr += sizeof(frame_header_struct_t);
+
+    cmd_id = CUSTOM_INFO_CMD_ID;
+    memcpy(tx_data + ptr, &cmd_id, sizeof(uint16_t));
+    ptr += sizeof(uint16_t);
+
+    memcpy(tx_data + ptr, &custom_info, data_length);
+    ptr += data_length;
+
+    ui_crc_16 = Get_CRC16_Check_Sum_UI(tx_data, ptr);
+    memcpy(tx_data + ptr, &ui_crc_16, sizeof(uint16_t));
+    ptr += sizeof(uint16_t);
+
+    usartSendMessage(referee_instance->usart_info, tx_data, ptr, USART_TRANSFER_BLOCKING);
 }

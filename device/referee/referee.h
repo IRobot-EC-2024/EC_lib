@@ -76,10 +76,11 @@ uint16_t referee_data_solve(uint8_t* frame);
 uint16_t referee_unpack_fifo_data(void);
 Referee_t* refereeReceiverGet(void);
 
-void refereeInteractionPush(robot_interaction_data_t* interaction_data, uint8_t user_data_length);
+void refereeInteractionPush(uint16_t data_cmd_id, uint8_t* data, uint8_t user_data_length);
 void refereeInteractionSend(void);
 uint32_t refereeInteractionRemain(void);
 void refereeFigurePush(interaction_figure_t* interaction_figure);
 void refereeFigure2Interaction(void);
+void refereeCustomInfoSend(uint8_t* data, uint8_t data_length);
 
 #endif  // !REFEREE_RECEIVER_H__
