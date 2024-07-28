@@ -5,7 +5,7 @@
 #include "main.h"
 #include "referee.h"
 
-unsigned char UI_Seq;  // 包序号
+uint8_t pic_cnt;  // 包序号
 
 /********************************************删除操作*************************************
 **参数：Del_Operate  对应头文件删除操作
@@ -43,6 +43,11 @@ void Line_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Grap
     image->end_x = End_x;
     image->end_y = End_y;
     refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制矩形*************************************************
@@ -70,6 +75,11 @@ void Rectangle_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32
     image->end_x = End_x;
     image->end_y = End_y;
     refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制整圆*************************************************
@@ -96,6 +106,11 @@ void Circle_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Gr
     image->start_y = Start_y;
     image->radius = Graph_Radius;
     refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制圆弧*************************************************
@@ -128,6 +143,11 @@ void Arc_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Graph
     image->end_x = x_Length;
     image->end_y = y_Length;
     refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制浮点型数据*************************************************
@@ -159,6 +179,11 @@ void Float_Draw(Float_Data* image, char imagename[3], u32 Graph_Operate, u32 Gra
     image->end_angle = Graph_Digit;
     image->graph_Float = Graph_Float;
     refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制字符型数据*************************************************
