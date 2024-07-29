@@ -24,7 +24,7 @@ typedef struct {
     int8_t temperature;
     int16_t iq;
     int16_t speed;
-    uint16_t encoder;
+    int16_t encoder;
 } RMD_Motor_Info_t;
 
 typedef struct {
