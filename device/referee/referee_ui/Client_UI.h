@@ -1,10 +1,7 @@
 #ifndef __RM_CILENT_UI__
 #define __RM_CILENT_UI__
 
-
 #include "struct_typedef.h"
-
-#define __FALSE 100
 
 /****************************开始标志*********************/
 #define UI_SOF 0xA5
@@ -143,9 +140,6 @@ typedef struct {
 void UI_Delete(u8 Del_Operate, u8 Del_Layer);
 void Line_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Graph_Layer, u32 Graph_Color,
                u32 Graph_Width, u32 Start_x, u32 Start_y, u32 End_x, u32 End_y);
-int UI_ReFresh(int cnt, ...);
-unsigned char Get_CRC8_Check_Sum_UI(unsigned char* pchMessage, unsigned int dwLength, unsigned char ucCRC8);
-uint16_t Get_CRC16_Check_Sum_UI(uint8_t* pchMessage, uint32_t dwLength, uint16_t wCRC);
 void Circle_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Graph_Layer, u32 Graph_Color,
                  u32 Graph_Width, u32 Start_x, u32 Start_y, u32 Graph_Radius);
 void Rectangle_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Graph_Layer, u32 Graph_Color,
@@ -154,9 +148,10 @@ void Float_Draw(Float_Data* image, char imagename[3], u32 Graph_Operate, u32 Gra
                 u32 Graph_Size, u32 Graph_Digit, u32 Graph_Width, u32 Start_x, u32 Start_y, float Graph_Float);
 void Char_Draw(String_Data* image, char imagename[3], u32 Graph_Operate, u32 Graph_Layer, u32 Graph_Color,
                u32 Graph_Size, u32 Graph_Digit, u32 Graph_Width, u32 Start_x, u32 Start_y, char* Char_Data);
-int Char_ReFresh(String_Data string_Data);
 void Arc_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Graph_Layer, u32 Graph_Color,
               u32 Graph_StartAngle, u32 Graph_EndAngle, u32 Graph_Width, u32 Start_x, u32 Start_y, u32 x_Length,
               u32 y_Length);
 
+uint8_t Get_CRC8_Check_Sum_UI(uint8_t* pchMessage, uint32_t dwLength);
+uint16_t Get_CRC16_Check_Sum_UI(uint8_t* pchMessage, uint32_t dwLength);
 #endif

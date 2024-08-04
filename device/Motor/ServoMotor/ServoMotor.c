@@ -45,7 +45,6 @@ Servo_Motor_t* servoMotorAdd(Servo_Motor_Register_t* motor_reg) {
     motor->dutyratio_max = (20 - 2.5) / 20.0;
     motor->dutyratio_min = (20 - 0.5) / 20.0;
 
-    // 没有反馈默认离线
     motor->statu = STATE_OFFLINE;
 
     servo_motor[id_cnt++] = motor;
@@ -59,6 +58,10 @@ Servo_Motor_t* servoMotorAdd(Servo_Motor_Register_t* motor_reg) {
  * @return {*}
  */
 Return_t servoMotorSendMessage(Servo_Motor_t* motor) {
+    if (motor->statu != STATE_ONLINE) {
+        pwmSetDuty(motor->pwm_info, 1.0);
+        return RETURN_ERROR;
+    }
     fp32 dutyratio;
     dutyratio = (motor->command.angle - motor->motor_min) / (motor->motor_max - motor->motor_min) *
                     (motor->dutyratio_max - motor->dutyratio_min) +
@@ -89,5 +92,11 @@ Return_t servoMotorSendAll() {
  */
 Return_t servoMotorOff(Servo_Motor_t* motor) {
     pwmSetDuty(motor->pwm_info, 1.0);
+    motor->statu = STATE_OFFLINE;
+    return RETURN_SUCCESS;
+}
+
+Return_t servoMotorOn(Servo_Motor_t* motor) {
+    motor->statu = STATE_ONLINE;
     return RETURN_SUCCESS;
 }

@@ -5,15 +5,7 @@
 #include "main.h"
 #include "referee.h"
 
-unsigned char UI_Seq;  // 包序号
-Referee_t* referee_rev1;
-
-void Client_UI_Init() { referee_rev1 = refereeReceiverGet(); }
-
-/****************************************串口驱动映射************************************/
-void UI_SendByte(unsigned char ch) {
-    // HAL_UART_Transmit(&huart6, &ch, 1, 0xfff);
-}
+uint8_t pic_cnt;  // 包序号
 
 /********************************************删除操作*************************************
 **参数：Del_Operate  对应头文件删除操作
@@ -21,99 +13,11 @@ void UI_SendByte(unsigned char ch) {
 *****************************************************************************************/
 
 void UI_Delete(u8 Del_Operate, u8 Del_Layer) {
-    unsigned char* framepoint;  // 读写指针
-    u16 frametail = 0xFFFF;     // CRC16校验值
-    int loop_control;           // For函数循环控制
-
-    UI_Packhead framehead;
-    UI_Data_Operate datahead;
     UI_Data_Delete del;
-
-    framepoint = (unsigned char*)&framehead;
-
-    framehead.SOF = UI_SOF;
-    framehead.Data_Length = 8;
-    framehead.Seq = UI_Seq;
-    framehead.CRC8 = Get_CRC8_Check_Sum_UI(framepoint, 4, 0xFF);
-    framehead.CMD_ID = UI_CMD_Robo_Exchange;  // 填充包头数据
-
-    datahead.Data_ID = UI_Data_ID_Del;
-
-    switch (referee_rev1->referee_info.robot_status.robot_id) {
-        case 1: {
-            datahead.Sender_ID = UI_Data_RobotID_RHero;
-            datahead.Receiver_ID = UI_Data_CilentID_RHero;
-        } break;
-        case 101: {
-            datahead.Sender_ID = UI_Data_RobotID_BHero;
-            datahead.Receiver_ID = UI_Data_CilentID_BHero;
-        } break;
-        case 2: {
-            datahead.Sender_ID = UI_Data_RobotID_REngineer;
-            datahead.Receiver_ID = UI_Data_CilentID_REngineer;
-        } break;
-        case 102: {
-            datahead.Sender_ID = UI_Data_RobotID_BEngineer;
-            datahead.Receiver_ID = UI_Data_CilentID_BEngineer;
-        } break;
-        case 3: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard1;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard1;
-        } break;
-        case 103: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard1;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard1;
-        } break;
-        case 4: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard2;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard2;
-        } break;
-        case 104: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard2;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard2;
-        } break;
-        case 5: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard3;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard3;
-        } break;
-        case 105: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard3;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard3;
-        } break;
-    }
 
     del.Delete_Operate = Del_Operate;
     del.Layer = Del_Layer;  // 控制信息
-
-    frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(framehead), frametail);
-    framepoint = (unsigned char*)&datahead;
-    frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(datahead), frametail);
-    framepoint = (unsigned char*)&del;
-    frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(del),
-                                       frametail);  // CRC16校验值计算
-
-    framepoint = (unsigned char*)&framehead;
-    for (loop_control = 0; loop_control < sizeof(framehead); loop_control++) {
-        UI_SendByte(*framepoint);
-        framepoint++;
-    }
-    framepoint = (unsigned char*)&datahead;
-    for (loop_control = 0; loop_control < sizeof(datahead); loop_control++) {
-        UI_SendByte(*framepoint);
-        framepoint++;
-    }
-    framepoint = (unsigned char*)&del;
-    for (loop_control = 0; loop_control < sizeof(del); loop_control++) {
-        UI_SendByte(*framepoint);
-        framepoint++;
-    }  // 发送所有帧
-    framepoint = (unsigned char*)&frametail;
-    for (loop_control = 0; loop_control < sizeof(frametail); loop_control++) {
-        UI_SendByte(*framepoint);
-        framepoint++;  // 发送CRC16校验值
-    }
-
-    UI_Seq++;  // 包序号+1
+    refereeInteractionPush(UI_Data_ID_DrawChar, (uint8_t*)&del, sizeof(UI_Data_Delete));
 }
 /************************************************绘制直线*************************************************
 **参数：*image Graph_Data类型变量指针，用于存放图形数据
@@ -138,6 +42,12 @@ void Line_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Grap
     image->start_y = Start_y;
     image->end_x = End_x;
     image->end_y = End_y;
+    refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制矩形*************************************************
@@ -164,6 +74,12 @@ void Rectangle_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32
     image->start_y = Start_y;
     image->end_x = End_x;
     image->end_y = End_y;
+    refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制整圆*************************************************
@@ -189,6 +105,12 @@ void Circle_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Gr
     image->start_x = Start_x;
     image->start_y = Start_y;
     image->radius = Graph_Radius;
+    refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制圆弧*************************************************
@@ -220,6 +142,12 @@ void Arc_Draw(Graph_Data* image, char imagename[3], u32 Graph_Operate, u32 Graph
     image->end_angle = Graph_EndAngle;
     image->end_x = x_Length;
     image->end_y = y_Length;
+    refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制浮点型数据*************************************************
@@ -250,6 +178,12 @@ void Float_Draw(Float_Data* image, char imagename[3], u32 Graph_Operate, u32 Gra
     image->start_angle = Graph_Size;
     image->end_angle = Graph_Digit;
     image->graph_Float = Graph_Float;
+    refereeFigurePush((interaction_figure_t*)image);
+    pic_cnt++;
+    if(pic_cnt==7){
+        refereeFigure2Interaction();
+        pic_cnt=0;
+    }
 }
 
 /************************************************绘制字符型数据*************************************************
@@ -284,236 +218,8 @@ void Char_Draw(String_Data* image, char imagename[3], u32 Graph_Operate, u32 Gra
         image->show_Data[i] = *Char_Data;
         Char_Data++;
     }
-}
-
-/************************************************UI推送函数（使更改生效）*********************************
-**参数： cnt   图形个数
-         ...   图形变量参数
-
-
-Tips：：该函数只能推送1，2，5，7个图形，其他数目协议未涉及
-**********************************************************************************************************/
-int UI_ReFresh(int cnt, ...) {
-    int i, n;
-    Graph_Data imageData;
-    unsigned char* framepoint;  // 读写指针
-    u16 frametail = 0xFFFF;     // CRC16校验值
-
-    UI_Packhead framehead;
-    UI_Data_Operate datahead;
-
-    va_list ap;
-    va_start(ap, cnt);
-
-    framepoint = (unsigned char*)&framehead;
-    framehead.SOF = UI_SOF;
-    framehead.Data_Length = 6 + cnt * 15;
-    framehead.Seq = UI_Seq;
-    framehead.CRC8 = Get_CRC8_Check_Sum_UI(framepoint, 4, 0xFF);
-    framehead.CMD_ID = UI_CMD_Robo_Exchange;  // 填充包头数据
-
-    switch (cnt) {
-        case 1:
-            datahead.Data_ID = UI_Data_ID_Draw1;
-            break;
-        case 2:
-            datahead.Data_ID = UI_Data_ID_Draw2;
-            break;
-        case 5:
-            datahead.Data_ID = UI_Data_ID_Draw5;
-            break;
-        case 7:
-            datahead.Data_ID = UI_Data_ID_Draw7;
-            break;
-        default:
-            return (-1);
-    }
-
-    switch (referee_rev1->referee_info.robot_status.robot_id) {
-        case 1: {
-            datahead.Sender_ID = UI_Data_RobotID_RHero;
-            datahead.Receiver_ID = UI_Data_CilentID_RHero;
-        } break;
-        case 101: {
-            datahead.Sender_ID = UI_Data_RobotID_BHero;
-            datahead.Receiver_ID = UI_Data_CilentID_BHero;
-        } break;
-        case 2: {
-            datahead.Sender_ID = UI_Data_RobotID_REngineer;
-            datahead.Receiver_ID = UI_Data_CilentID_REngineer;
-        } break;
-        case 102: {
-            datahead.Sender_ID = UI_Data_RobotID_BEngineer;
-            datahead.Receiver_ID = UI_Data_CilentID_BEngineer;
-        } break;
-        case 3: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard1;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard1;
-        } break;
-        case 103: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard1;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard1;
-        } break;
-        case 4: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard2;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard2;
-        } break;
-        case 104: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard2;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard2;
-        } break;
-        case 5: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard3;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard3;
-        } break;
-        case 105: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard3;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard3;
-        } break;
-    }
-
-    framepoint = (unsigned char*)&framehead;
-    frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(framehead), frametail);
-    framepoint = (unsigned char*)&datahead;
-    frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(datahead),
-                                       frametail);  // CRC16校验值计算（部分）
-
-    framepoint = (unsigned char*)&framehead;
-    for (i = 0; i < sizeof(framehead); i++) {
-        UI_SendByte(*framepoint);
-        framepoint++;
-    }
-    framepoint = (unsigned char*)&datahead;
-    for (i = 0; i < sizeof(datahead); i++) {
-        UI_SendByte(*framepoint);
-        framepoint++;
-    }
-
-    for (i = 0; i < cnt; i++) {
-        imageData = va_arg(ap, Graph_Data);
-
-        framepoint = (unsigned char*)&imageData;
-        frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(imageData),
-                                           frametail);  // CRC16校验
-
-        for (n = 0; n < sizeof(imageData); n++) {
-            UI_SendByte(*framepoint);
-            framepoint++;
-        }  // 发送图片帧
-    }
-    framepoint = (unsigned char*)&frametail;
-    for (i = 0; i < sizeof(frametail); i++) {
-        UI_SendByte(*framepoint);
-        framepoint++;  // 发送CRC16校验值
-    }
-
-    va_end(ap);
-
-    UI_Seq++;  // 包序号+1
-    return 0;
-}
-
-/************************************************UI推送字符（使更改生效）*********************************
-**参数： cnt   图形个数
-         ...   图形变量参数
-
-
-Tips：：该函数只能推送1，2，5，7个图形，其他数目协议未涉及
-**********************************************************************************************************/
-int Char_ReFresh(String_Data string_Data) {
-    int i;
-    String_Data imageData;
-    unsigned char* framepoint;  // 读写指针
-    u16 frametail = 0xFFFF;     // CRC16校验值
-
-    UI_Packhead framehead;
-    UI_Data_Operate datahead;
-    imageData = string_Data;
-
-    framepoint = (unsigned char*)&framehead;
-    framehead.SOF = UI_SOF;
-    framehead.Data_Length = 6 + 45;
-    framehead.Seq = UI_Seq;
-    framehead.CRC8 = Get_CRC8_Check_Sum_UI(framepoint, 4, 0xFF);
-    framehead.CMD_ID = UI_CMD_Robo_Exchange;  // 填充包头数据
-
-    datahead.Data_ID = UI_Data_ID_DrawChar;
-
-    switch (referee_rev1->referee_info.robot_status.robot_id) {
-        case 1: {
-            datahead.Sender_ID = UI_Data_RobotID_RHero;
-            datahead.Receiver_ID = UI_Data_CilentID_RHero;
-        } break;
-        case 101: {
-            datahead.Sender_ID = UI_Data_RobotID_BHero;
-            datahead.Receiver_ID = UI_Data_CilentID_BHero;
-        } break;
-        case 2: {
-            datahead.Sender_ID = UI_Data_RobotID_REngineer;
-            datahead.Receiver_ID = UI_Data_CilentID_REngineer;
-        } break;
-        case 102: {
-            datahead.Sender_ID = UI_Data_RobotID_BEngineer;
-            datahead.Receiver_ID = UI_Data_CilentID_BEngineer;
-        } break;
-        case 3: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard1;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard1;
-        } break;
-        case 103: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard1;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard1;
-        } break;
-        case 4: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard2;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard2;
-        } break;
-        case 104: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard2;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard2;
-        } break;
-        case 5: {
-            datahead.Sender_ID = UI_Data_RobotID_RStandard3;
-            datahead.Receiver_ID = UI_Data_CilentID_RStandard3;
-        } break;
-        case 105: {
-            datahead.Sender_ID = UI_Data_RobotID_BStandard3;
-            datahead.Receiver_ID = UI_Data_CilentID_BStandard3;
-        } break;
-    }
-
-    framepoint = (unsigned char*)&framehead;
-    frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(framehead), frametail);
-    framepoint = (unsigned char*)&datahead;
-    frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(datahead), frametail);
-    framepoint = (unsigned char*)&imageData;
-    frametail = Get_CRC16_Check_Sum_UI(framepoint, sizeof(imageData),
-                                       frametail);  // CRC16校验   //CRC16校验值计算（部分）
-
-    framepoint = (unsigned char*)&framehead;
-    for (i = 0; i < sizeof(framehead); i++) {
-        UI_SendByte(*framepoint);
-        framepoint++;
-    }
-    framepoint = (unsigned char*)&datahead;
-    for (i = 0; i < sizeof(datahead); i++) {
-        UI_SendByte(*framepoint);
-        framepoint++;
-    }  // 发送操作数据
-    framepoint = (unsigned char*)&imageData;
-    for (i = 0; i < sizeof(imageData); i++) {
-        UI_SendByte(*framepoint);
-        framepoint++;
-    }  // 发送图片帧
-
-    framepoint = (unsigned char*)&frametail;
-    for (i = 0; i < sizeof(frametail); i++) {
-        UI_SendByte(*framepoint);
-        framepoint++;  // 发送CRC16校验值
-    }
-
-    UI_Seq++;  // 包序号+1
-    return 0;
+    if (i < 30) image->show_Data[i + 1] = 0;
+    refereeInteractionPush(UI_Data_ID_DrawChar, (uint8_t*)image, 15 + Graph_Digit);
 }
 
 /*****************************************************CRC8校验值计算**********************************************/
@@ -534,8 +240,11 @@ const unsigned char CRC8_TAB_UI[256] = {
     0x88, 0xd6, 0x34, 0x6a, 0x2b, 0x75, 0x97, 0xc9, 0x4a, 0x14, 0xf6, 0xa8, 0x74, 0x2a, 0xc8, 0x96, 0x15, 0x4b, 0xa9,
     0xf7, 0xb6, 0xe8, 0x0a, 0x54, 0xd7, 0x89, 0x6b, 0x35,
 };
-unsigned char Get_CRC8_Check_Sum_UI(unsigned char* pchMessage, unsigned int dwLength, unsigned char ucCRC8) {
-    unsigned char ucIndex;
+uint8_t Get_CRC8_Check_Sum_UI(uint8_t* pchMessage, uint32_t dwLength) {
+    unsigned char ucIndex, ucCRC8 = CRC8_INIT_UI;
+    if (pchMessage == NULL) {
+        return 0xFF;
+    }
     while (dwLength--) {
         ucIndex = ucCRC8 ^ (*pchMessage++);
         ucCRC8 = CRC8_TAB_UI[ucIndex];
@@ -569,8 +278,9 @@ const uint16_t wCRC_Table_UI[256] = {
 ** Input: Data to check,Stream length, initialized checksum
 ** Output: CRC checksum
 */
-uint16_t Get_CRC16_Check_Sum_UI(uint8_t* pchMessage, uint32_t dwLength, uint16_t wCRC) {
+uint16_t Get_CRC16_Check_Sum_UI(uint8_t* pchMessage, uint32_t dwLength) {
     Uint8_t chData;
+    uint16_t wCRC = CRC_INIT_UI;
     if (pchMessage == NULL) {
         return 0xFFFF;
     }

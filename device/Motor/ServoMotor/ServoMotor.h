@@ -52,5 +52,6 @@ Servo_Motor_t* servoMotorAdd(Servo_Motor_Register_t* reg);
 Return_t servoMotorSendMessage(Servo_Motor_t* motor);
 Return_t servoMotorSendAll(void);
 Return_t servoMotorOff(Servo_Motor_t* motor);
+Return_t servoMotorOn(Servo_Motor_t* motor);
 
 #endif
